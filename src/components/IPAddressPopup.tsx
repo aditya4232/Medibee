@@ -1,14 +1,15 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, X, Globe, Clock, Monitor, Smartphone, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useSession } from './SessionProvider';
 
 const IPAddressPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [ipData, setIpData] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState(null);
+  const { startSession } = useSession();
 
   const getDeviceInfo = () => {
     const userAgent = navigator.userAgent;
@@ -34,7 +35,7 @@ const IPAddressPopup = () => {
   };
 
   useEffect(() => {
-    const hasSeenPopup = localStorage.getItem('medibee_ip_popup_seen');
+    const hasSeenPopup = localStorage.getItem('medibee_session_id');
     if (!hasSeenPopup) {
       const deviceData = getDeviceInfo();
       setDeviceInfo(deviceData);
@@ -57,26 +58,12 @@ const IPAddressPopup = () => {
     }
   }, []);
 
-  const handleAccept = () => {
-    const sessionId = Math.random().toString(36).substring(7) + Date.now().toString(36);
-    const sessionData = {
-      sessionId,
-      ipAddress: ipData.ip,
-      location: ipData.location,
-      deviceInfo: `${deviceInfo.type} - ${deviceInfo.browser}`,
-      startTime: ipData.timestamp,
-      visitedPages: ['/'],
-      userData: {},
-      isActive: true
-    };
-    
-    localStorage.setItem('medibee_session', JSON.stringify(sessionData));
-    localStorage.setItem('medibee_ip_popup_seen', 'true');
+  const handleAccept = async () => {
+    await startSession(ipData, deviceInfo);
     setIsVisible(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem('medibee_ip_popup_seen', 'true');
     setIsVisible(false);
   };
 
@@ -105,8 +92,8 @@ const IPAddressPopup = () => {
                       <Shield className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-foreground text-xl">Secure Session</CardTitle>
-                      <p className="text-sm text-muted-foreground">Blockchain-based privacy protection</p>
+                      <CardTitle className="text-foreground text-xl">Start Secure Session</CardTitle>
+                      <p className="text-sm text-muted-foreground">Begin your medical journey</p>
                     </div>
                   </div>
                   <button
@@ -121,7 +108,7 @@ const IPAddressPopup = () => {
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-foreground mb-2">Welcome to MediBee! 🐝</h3>
                   <p className="text-muted-foreground text-sm">
-                    We've detected your connection to provide you with a secure, personalized healthcare experience.
+                    Start a secure session to access personalized medical assistance and store your health data.
                   </p>
                 </div>
                 
@@ -158,17 +145,18 @@ const IPAddressPopup = () => {
                     </div>
                   </div>
                 </div>
-
+                
                 <div className="text-xs text-muted-foreground bg-white/5 p-4 rounded-xl border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Shield className="h-4 w-4 text-medical-blue" />
-                    <span className="font-semibold">Privacy & Security Promise</span>
+                    <span className="font-semibold">What happens when you start a session?</span>
                   </div>
                   <ul className="space-y-1 ml-6">
-                    <li>• Your data is encrypted using blockchain technology</li>
-                    <li>• Session data is stored locally on your device only</li>
-                    <li>• No permanent data collection or tracking</li>
-                    <li>• You can end your session anytime</li>
+                    <li>• Access to medical record upload & analysis</li>
+                    <li>• Personalized health insights & recommendations</li>
+                    <li>• Secure data storage with Firebase</li>
+                    <li>• Search medical information & get references</li>
+                    <li>• Generate and download medical reports</li>
                   </ul>
                 </div>
 
@@ -177,14 +165,14 @@ const IPAddressPopup = () => {
                     onClick={handleAccept}
                     className="flex-1 bg-medical-gradient hover:opacity-90 text-white font-semibold py-3"
                   >
-                    Start Secure Session
+                    Start Medical Session
                   </Button>
                   <Button
                     onClick={handleDecline}
                     variant="outline"
                     className="flex-1 glass border-white/30 hover:bg-white/10 py-3"
                   >
-                    Decline
+                    Browse Only
                   </Button>
                 </div>
               </CardContent>

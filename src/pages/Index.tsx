@@ -1,6 +1,6 @@
-import { useState } from 'react';
+
 import { motion } from 'framer-motion';
-import { Upload, User, Activity, Heart, Brain, Microscope, MessageCircle, TrendingUp, Users, Shield, Target, Code, Cloud } from 'lucide-react';
+import { Upload, Brain, Microscope, MessageCircle, Heart, Activity, Search, Scan } from 'lucide-react';
 import Hero from '@/components/Hero';
 import HealthMetrics from '@/components/HealthMetrics';
 import MediBeeChat from '@/components/MediBeeChat';
@@ -13,56 +13,58 @@ import WorkingSection from '@/components/WorkingSection';
 import AimSection from '@/components/AimSection';
 import AboutProject from '@/components/AboutProject';
 import AboutDeveloper from '@/components/AboutDeveloper';
+import SessionActions from '@/components/SessionActions';
+import { useSession } from '@/components/SessionProvider';
 
 const Index = () => {
+  const { hasActiveSession } = useSession();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 relative overflow-hidden">
-      {/* Animated DNA Background */}
       <DNABackground />
-      
-      {/* Theme Switcher */}
       <ThemeSwitcher />
-      
-      {/* Navigation */}
       <Navigation />
-
-      {/* Hero Section */}
       <Hero />
 
-      {/* About Section */}
-      <AboutSection />
+      {/* Show session actions only when user has active session */}
+      {hasActiveSession && <SessionActions />}
 
-      {/* Working Section */}
-      <WorkingSection />
+      {/* Only show static content when no active session */}
+      {!hasActiveSession && (
+        <>
+          <AboutSection />
+          <WorkingSection />
+          <AimSection />
+          <MedicalHurdlesIndia />
+          <AboutProject />
+          <AboutDeveloper />
+        </>
+      )}
 
-      {/* Aim Section */}
-      <AimSection />
+      {/* Show health metrics only with active session and data */}
+      {hasActiveSession && (
+        <section className="relative z-10 py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl font-bold text-foreground mb-4">
+                Your Health Dashboard
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                AI-powered insights from your medical data
+              </p>
+            </motion.div>
+            
+            <HealthMetrics />
+          </div>
+        </section>
+      )}
 
-      {/* Medical Hurdles in India */}
-      <MedicalHurdlesIndia />
-
-      {/* Health Metrics Section */}
-      <section className="relative z-10 py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-foreground mb-4">
-              Your Health at a Glance
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              AI-powered insights from your medical data
-            </p>
-          </motion.div>
-          
-          <HealthMetrics />
-        </div>
-      </section>
-
-      {/* Features Section */}
+      {/* Features Section - Always show */}
       <section className="relative z-10 py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -108,7 +110,7 @@ const Index = () => {
               {
                 icon: Upload,
                 title: "Secure Storage",
-                description: "Your medical data is encrypted and stored securely with IPFS integration",
+                description: "Your medical data is encrypted and stored securely with Firebase",
                 color: "text-medical-green"
               },
               {
@@ -138,12 +140,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* About Project */}
-      <AboutProject />
-
-      {/* About Developer */}
-      <AboutDeveloper />
-
       {/* CTA Section */}
       <section className="relative z-10 py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -159,7 +155,7 @@ const Index = () => {
             <p className="text-xl text-muted-foreground mb-8">
               Join thousands of users who trust MediBee for their medical needs
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {!hasActiveSession && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -167,19 +163,11 @@ const Index = () => {
               >
                 Start Your Health Journey
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 glass text-foreground rounded-xl font-semibold hover:shadow-lg transition-all"
-              >
-                Upload Medical Report
-              </motion.button>
-            </div>
+            )}
           </motion.div>
         </div>
       </section>
 
-      {/* Floating MediBee Chat */}
       <MediBeeChat />
     </div>
   );

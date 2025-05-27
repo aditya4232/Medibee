@@ -1,6 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface SessionData {
   sessionId: string;
@@ -9,16 +11,24 @@ interface SessionData {
   location: string;
   startTime: string;
   visitedPages: string[];
-  userData: any;
+  userData: {
+    medicalRecords: any[];
+    searchHistory: string[];
+    userName?: string;
+  };
   isActive: boolean;
 }
 
 interface SessionContextType {
   session: SessionData | null;
-  updateUserData: (data: any) => void;
+  hasActiveSession: boolean;
+  startSession: (ipData: any, deviceData: any) => Promise<void>;
+  updateUserData: (data: any) => Promise<void>;
+  addMedicalRecord: (record: any) => Promise<void>;
+  addSearchQuery: (query: string) => Promise<void>;
   endSession: () => void;
   shareSession: () => string;
-  saveSessionWithGoogle: () => void;
+  updateUserName: (name: string) => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -33,56 +43,131 @@ export const useSession = () => {
 
 const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<SessionData | null>(null);
+  const [hasActiveSession, setHasActiveSession] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Load existing session or create new one
-    const existingSession = localStorage.getItem('medibee_session');
-    if (existingSession) {
-      try {
-        const sessionData = JSON.parse(existingSession);
-        // Ensure visitedPages is always an array
-        if (!Array.isArray(sessionData.visitedPages)) {
-          sessionData.visitedPages = [];
-        }
-        setSession(sessionData);
-      } catch (error) {
-        console.error('Error parsing session data:', error);
-        localStorage.removeItem('medibee_session');
-      }
+    // Check for existing session
+    const existingSessionId = localStorage.getItem('medibee_session_id');
+    if (existingSessionId) {
+      loadSession(existingSessionId);
     }
   }, []);
 
   useEffect(() => {
-    // Track visited pages
-    if (session) {
-      // Ensure visitedPages is an array before spreading
+    // Track visited pages only if session exists
+    if (session && hasActiveSession) {
       const currentPages = Array.isArray(session.visitedPages) ? session.visitedPages : [];
       const updatedSession = {
         ...session,
         visitedPages: [...new Set([...currentPages, location.pathname])]
       };
       setSession(updatedSession);
-      localStorage.setItem('medibee_session', JSON.stringify(updatedSession));
+      updateSessionInFirebase(updatedSession);
     }
-  }, [location.pathname, session]);
+  }, [location.pathname, session, hasActiveSession]);
 
-  const updateUserData = (data: any) => {
+  const loadSession = async (sessionId: string) => {
+    try {
+      const sessionDoc = await getDoc(doc(db, 'sessions', sessionId));
+      if (sessionDoc.exists()) {
+        const sessionData = sessionDoc.data() as SessionData;
+        setSession(sessionData);
+        setHasActiveSession(true);
+      } else {
+        localStorage.removeItem('medibee_session_id');
+      }
+    } catch (error) {
+      console.error('Error loading session:', error);
+      localStorage.removeItem('medibee_session_id');
+    }
+  };
+
+  const startSession = async (ipData: any, deviceData: any) => {
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const sessionData: SessionData = {
+      sessionId,
+      ipAddress: ipData.ip,
+      location: ipData.location,
+      deviceInfo: `${deviceData.type} - ${deviceData.browser}`,
+      startTime: new Date().toISOString(),
+      visitedPages: ['/'],
+      userData: {
+        medicalRecords: [],
+        searchHistory: []
+      },
+      isActive: true
+    };
+
+    try {
+      await setDoc(doc(db, 'sessions', sessionId), sessionData);
+      localStorage.setItem('medibee_session_id', sessionId);
+      setSession(sessionData);
+      setHasActiveSession(true);
+    } catch (error) {
+      console.error('Error starting session:', error);
+    }
+  };
+
+  const updateSessionInFirebase = async (sessionData: SessionData) => {
+    try {
+      await updateDoc(doc(db, 'sessions', sessionData.sessionId), sessionData);
+    } catch (error) {
+      console.error('Error updating session:', error);
+    }
+  };
+
+  const updateUserData = async (data: any) => {
     if (session) {
       const updatedSession = {
         ...session,
         userData: { ...session.userData, ...data }
       };
       setSession(updatedSession);
-      localStorage.setItem('medibee_session', JSON.stringify(updatedSession));
+      await updateSessionInFirebase(updatedSession);
+    }
+  };
+
+  const addMedicalRecord = async (record: any) => {
+    if (session) {
+      const updatedRecords = [...session.userData.medicalRecords, { ...record, id: Date.now(), timestamp: new Date().toISOString() }];
+      const updatedSession = {
+        ...session,
+        userData: { ...session.userData, medicalRecords: updatedRecords }
+      };
+      setSession(updatedSession);
+      await updateSessionInFirebase(updatedSession);
+    }
+  };
+
+  const addSearchQuery = async (query: string) => {
+    if (session) {
+      const updatedHistory = [...session.userData.searchHistory, query];
+      const updatedSession = {
+        ...session,
+        userData: { ...session.userData, searchHistory: updatedHistory }
+      };
+      setSession(updatedSession);
+      await updateSessionInFirebase(updatedSession);
+    }
+  };
+
+  const updateUserName = async (name: string) => {
+    if (session) {
+      const updatedSession = {
+        ...session,
+        userData: { ...session.userData, userName: name }
+      };
+      setSession(updatedSession);
+      await updateSessionInFirebase(updatedSession);
     }
   };
 
   const endSession = () => {
-    localStorage.removeItem('medibee_session');
-    sessionStorage.clear();
+    localStorage.removeItem('medibee_session_id');
     setSession(null);
+    setHasActiveSession(false);
     navigate('/');
   };
 
@@ -95,18 +180,17 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     return '';
   };
 
-  const saveSessionWithGoogle = () => {
-    // Implement Google OAuth integration
-    console.log('Save session with Google');
-  };
-
   return (
     <SessionContext.Provider value={{
       session,
+      hasActiveSession,
+      startSession,
       updateUserData,
+      addMedicalRecord,
+      addSearchQuery,
       endSession,
       shareSession,
-      saveSessionWithGoogle
+      updateUserName
     }}>
       {children}
     </SessionContext.Provider>

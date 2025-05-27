@@ -7,6 +7,7 @@ import HealthMetrics from '@/components/HealthMetrics';
 import MediBeeChat from '@/components/MediBeeChat';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import DNABackground from '@/components/DNABackground';
+import Navigation from '@/components/Navigation';
 
 const Index = () => {
   return (
@@ -18,36 +19,7 @@ const Index = () => {
       <ThemeSwitcher />
       
       {/* Navigation */}
-      <nav className="relative z-10 glass mx-4 mt-4 p-4 rounded-2xl">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <div className="w-10 h-10 bg-medical-gradient rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🐝</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">MediBee</h1>
-              <p className="text-sm text-muted-foreground">Your Tiny Medical Assistant</p>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="hidden md:flex items-center gap-6"
-          >
-            <a href="#dashboard" className="text-foreground hover:text-medical-blue transition-colors">Dashboard</a>
-            <a href="#analysis" className="text-foreground hover:text-medical-blue transition-colors">Analysis</a>
-            <a href="#reports" className="text-foreground hover:text-medical-blue transition-colors">Reports</a>
-            <button className="px-4 py-2 bg-medical-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Get Started
-            </button>
-          </motion.div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <Hero />

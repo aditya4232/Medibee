@@ -1,13 +1,18 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, User, Activity, Heart, Brain, Microscope, MessageCircle } from 'lucide-react';
+import { Upload, User, Activity, Heart, Brain, Microscope, MessageCircle, TrendingUp, Users, Shield, Target, Code, Cloud } from 'lucide-react';
 import Hero from '@/components/Hero';
 import HealthMetrics from '@/components/HealthMetrics';
 import MediBeeChat from '@/components/MediBeeChat';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import DNABackground from '@/components/DNABackground';
 import Navigation from '@/components/Navigation';
+import AboutSection from '@/components/AboutSection';
+import MedicalHurdlesIndia from '@/components/MedicalHurdlesIndia';
+import WorkingSection from '@/components/WorkingSection';
+import AimSection from '@/components/AimSection';
+import AboutProject from '@/components/AboutProject';
+import AboutDeveloper from '@/components/AboutDeveloper';
 
 const Index = () => {
   return (
@@ -23,6 +28,18 @@ const Index = () => {
 
       {/* Hero Section */}
       <Hero />
+
+      {/* About Section */}
+      <AboutSection />
+
+      {/* Working Section */}
+      <WorkingSection />
+
+      {/* Aim Section */}
+      <AimSection />
+
+      {/* Medical Hurdles in India */}
+      <MedicalHurdlesIndia />
 
       {/* Health Metrics Section */}
       <section className="relative z-10 py-20 px-4">
@@ -120,6 +137,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* About Project */}
+      <AboutProject />
+
+      {/* About Developer */}
+      <AboutDeveloper />
 
       {/* CTA Section */}
       <section className="relative z-10 py-20 px-4">

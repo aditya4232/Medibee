@@ -8,9 +8,9 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Analysis from "./pages/Analysis";
 import Reports from "./pages/Reports";
-import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import IPAddressPopup from "./components/IPAddressPopup";
+import SessionProvider from "./components/SessionProvider";
 
 const queryClient = new QueryClient();
 
@@ -20,15 +20,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <IPAddressPopup />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/analysis" element={<Analysis />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <SessionProvider>
+          <IPAddressPopup />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analysis" element={<Analysis />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </SessionProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

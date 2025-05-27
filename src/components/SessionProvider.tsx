@@ -40,22 +40,33 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     // Load existing session or create new one
     const existingSession = localStorage.getItem('medibee_session');
     if (existingSession) {
-      const sessionData = JSON.parse(existingSession);
-      setSession(sessionData);
+      try {
+        const sessionData = JSON.parse(existingSession);
+        // Ensure visitedPages is always an array
+        if (!Array.isArray(sessionData.visitedPages)) {
+          sessionData.visitedPages = [];
+        }
+        setSession(sessionData);
+      } catch (error) {
+        console.error('Error parsing session data:', error);
+        localStorage.removeItem('medibee_session');
+      }
     }
   }, []);
 
   useEffect(() => {
     // Track visited pages
     if (session) {
+      // Ensure visitedPages is an array before spreading
+      const currentPages = Array.isArray(session.visitedPages) ? session.visitedPages : [];
       const updatedSession = {
         ...session,
-        visitedPages: [...new Set([...session.visitedPages, location.pathname])]
+        visitedPages: [...new Set([...currentPages, location.pathname])]
       };
       setSession(updatedSession);
       localStorage.setItem('medibee_session', JSON.stringify(updatedSession));
     }
-  }, [location.pathname]);
+  }, [location.pathname, session]);
 
   const updateUserData = (data: any) => {
     if (session) {

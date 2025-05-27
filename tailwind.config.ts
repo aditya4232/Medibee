@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'inter': ['Inter', 'sans-serif'],
+				'mono': ['JetBrains Mono', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,12 +66,30 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				medical: {
+					blue: '#3B82F6',
+					green: '#10B981',
+					purple: '#8B5CF6',
+					amber: '#F59E0B',
+					red: '#EF4444'
+				},
+				neon: {
+					cyan: '#06B6D4',
+					magenta: '#EC4899',
+					lime: '#84CC16',
+					purple: '#A855F7'
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			backgroundImage: {
+				'medical-gradient': 'linear-gradient(135deg, #3B82F6 0%, #10B981 50%, #8B5CF6 100%)',
+				'neon-gradient': 'linear-gradient(135deg, #06B6D4 0%, #EC4899 50%, #84CC16 100%)',
+				'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +107,37 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'pulse-glow': {
+					'0%, 100%': { opacity: '1', transform: 'scale(1)' },
+					'50%': { opacity: '0.8', transform: 'scale(1.05)' }
+				},
+				'dna-rotate': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'fade-in-up': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'dna-rotate': 'dna-rotate 20s linear infinite',
+				'fade-in-up': 'fade-in-up 0.6s ease-out'
+			},
+			boxShadow: {
+				'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+				'neon-blue': '0 0 20px rgba(59, 130, 246, 0.5)',
+				'neon-green': '0 0 20px rgba(16, 185, 129, 0.5)',
+				'neon-purple': '0 0 20px rgba(139, 92, 246, 0.5)',
 			}
 		}
 	},

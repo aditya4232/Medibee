@@ -1,12 +1,191 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Upload, User, Activity, Heart, Brain, Microscope, MessageCircle } from 'lucide-react';
+import Hero from '@/components/Hero';
+import HealthMetrics from '@/components/HealthMetrics';
+import MediBeeChat from '@/components/MediBeeChat';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
+import DNABackground from '@/components/DNABackground';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 relative overflow-hidden">
+      {/* Animated DNA Background */}
+      <DNABackground />
+      
+      {/* Theme Switcher */}
+      <ThemeSwitcher />
+      
+      {/* Navigation */}
+      <nav className="relative z-10 glass mx-4 mt-4 p-4 rounded-2xl">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3"
+          >
+            <div className="w-10 h-10 bg-medical-gradient rounded-xl flex items-center justify-center">
+              <span className="text-2xl">🐝</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">MediBee</h1>
+              <p className="text-sm text-muted-foreground">Your Tiny Medical Assistant</p>
+            </div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="hidden md:flex items-center gap-6"
+          >
+            <a href="#dashboard" className="text-foreground hover:text-medical-blue transition-colors">Dashboard</a>
+            <a href="#analysis" className="text-foreground hover:text-medical-blue transition-colors">Analysis</a>
+            <a href="#reports" className="text-foreground hover:text-medical-blue transition-colors">Reports</a>
+            <button className="px-4 py-2 bg-medical-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
+              Get Started
+            </button>
+          </motion.div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <Hero />
+
+      {/* Health Metrics Section */}
+      <section className="relative z-10 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-foreground mb-4">
+              Your Health at a Glance
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              AI-powered insights from your medical data
+            </p>
+          </motion.div>
+          
+          <HealthMetrics />
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative z-10 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-foreground mb-4">
+              Powered by Advanced AI
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Gemini AI integration for comprehensive medical assistance
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Brain,
+                title: "AI Medical Analysis",
+                description: "Advanced AI interprets your medical reports and provides easy-to-understand explanations",
+                color: "text-medical-blue"
+              },
+              {
+                icon: Microscope,
+                title: "Image Recognition",
+                description: "Upload medicine photos and get instant information about usage, dosage, and effects",
+                color: "text-medical-green"
+              },
+              {
+                icon: MessageCircle,
+                title: "Hinglish Support",
+                description: "Get medical guidance in both English and Hinglish for better understanding",
+                color: "text-medical-purple"
+              },
+              {
+                icon: Heart,
+                title: "Health Monitoring",
+                description: "Track vital signs and health metrics with personalized recommendations",
+                color: "text-medical-amber"
+              },
+              {
+                icon: Upload,
+                title: "Secure Storage",
+                description: "Your medical data is encrypted and stored securely with IPFS integration",
+                color: "text-medical-green"
+              },
+              {
+                icon: Activity,
+                title: "Real-time Insights",
+                description: "Get instant analysis and alerts for any concerning health patterns",
+                color: "text-medical-red"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="glass p-8 rounded-2xl group hover:shadow-glass transition-all duration-300"
+              >
+                <div className={`w-16 h-16 ${feature.color} bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform medical-glow`}>
+                  <feature.icon size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="glass p-12 rounded-3xl"
+          >
+            <h2 className="text-4xl font-bold text-foreground mb-6">
+              Ready to Transform Your Healthcare?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8">
+              Join thousands of users who trust MediBee for their medical needs
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-medical-gradient text-white rounded-xl font-semibold shadow-neon-blue hover:shadow-lg transition-all"
+              >
+                Start Your Health Journey
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 glass text-foreground rounded-xl font-semibold hover:shadow-lg transition-all"
+              >
+                Upload Medical Report
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Floating MediBee Chat */}
+      <MediBeeChat />
     </div>
   );
 };

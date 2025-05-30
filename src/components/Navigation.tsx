@@ -22,7 +22,7 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 glass mx-4 mt-4 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border border-white/20">
+      <nav className="fixed top-0 left-0 right-0 z-40 glass mx-4 mt-4 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border border-white/20">
         <div className="flex items-center justify-between max-w-7xl mx-auto p-4">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}

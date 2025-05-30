@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+MediBee – Your Tiny Medical Assistant A lightweight, AI-powered Progressive Web App (PWA) that simplifies medicine usage & medical jargon for Indian users. Built with privacy, simplicity, and accessibility in mind.
 
-## Project info
+📌 Overview MediBee is a small medical helper designed for everyday users who struggle with complex medical instructions or terms. It uses Gemini AI (Text & Vision) to break down information and display it in clean, understandable language – including Hinglish 🇮🇳.
 
-**URL**: https://lovable.dev/projects/33d009fe-caaa-415c-a496-a455f4a59034
+🎯 Key Goals: Simplify medicine usage & prescription info
 
-## How can I edit this code?
+Decode medical terms into simple, human-friendly language
 
-There are several ways of editing your application.
+Provide visuals & spoken guidance
 
-**Use Lovable**
+Work well on low-end devices (PWA)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/33d009fe-caaa-415c-a496-a455f4a59034) and start prompting.
+Ensure privacy-first data usage with optional IPFS + DIDs
 
-Changes made via Lovable will be committed automatically to this repo.
+⚙️ Features 🧠 Gemini AI integration – for real-time explanation & support
 
-**Use your preferred IDE**
+📷 Upload medicine images – and get quick feedback on use, dosage, etc.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+🗣️ Hinglish + English output – easy-to-understand content
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+🛡️ Decentralized Identity (DID) + WebCrypto – protect user identity
 
-Follow these steps:
+🌐 IPFS support (optional) – store personal health notes securely
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+📱 PWA-ready – installable, mobile-friendly & offline-friendly
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+🔧 Tech Stack HTML + JS (Vanilla, Lightweight)
 
-# Step 3: Install the necessary dependencies.
-npm i
+Gemini API (Text + Vision models)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Google Cloud (Vision OCR)
 
-**Edit a file directly in GitHub**
+Web Crypto API (for encryption)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+IPFS (via js-ipfs or web3.storage)
 
-**Use GitHub Codespaces**
+DID Protocol (light custom logic)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🚀 Getting Started bash Copy Edit git clone https://github.com/aditya4232/Skybee.git cd Skybee npm install # optional, if dependencies are added later npm run dev # or just open index.html directly for static use 📍 Use Cases Elderly users needing spoken guidance for medicines
 
-## What technologies are used for this project?
+Patients trying to understand prescriptions or diagnoses
 
-This project is built with:
+Anyone needing simplified info on medical terms or tablets
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Students building AI projects in healthcare + privacy
 
-## How can I deploy this project?
+💡 Roadmap Build simple UI for image upload + text input
 
-Simply open [Lovable](https://lovable.dev/projects/33d009fe-caaa-415c-a496-a455f4a59034) and click on Share -> Publish.
+Integrate Gemini Pro + Vision
 
-## Can I connect a custom domain to my Lovable project?
+Add Hinglish mode toggle
 
-Yes, you can!
+Connect IPFS for saving user notes
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Integrate lightweight DID auth
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Polish UX, mobile view, dark mode
+
+🤝 Contributing Want to improve MediBee or add features? PRs and suggestions are welcome! Feel free to fork, play around, and raise issues.
+
+📜 License MIT License © 2025 Aditya Shenvi
+
+🌐 Links 🔗 [Live Demo Coming Soon]

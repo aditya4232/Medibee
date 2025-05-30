@@ -17,10 +17,19 @@ import SessionActions from '@/components/SessionActions';
 import SessionPopup from '@/components/SessionPopup';
 import SessionIndicator from '@/components/SessionIndicator';
 import MedicalDisclaimer from '@/components/MedicalDisclaimer';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useSession } from '@/components/SessionProvider';
 
 const Index = () => {
-  const { hasActiveSession } = useSession();
+  const { hasActiveSession, isLoading } = useSession();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading MediBee..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 relative overflow-hidden">

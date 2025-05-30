@@ -27,18 +27,18 @@ const SessionPopup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
   const [ipData, setIPData] = useState<IPData | null>(null);
-  const { startSession, hasActiveSession } = useSession();
+  const { startSession, hasActiveSession, isLoading: sessionLoading } = useSession();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Show popup immediately when no active session
-    if (!hasActiveSession) {
+    // Show popup only when session is not loading and no active session exists
+    if (!sessionLoading && !hasActiveSession) {
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, 500); // Fast load - 500ms delay
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [hasActiveSession]);
+  }, [hasActiveSession, sessionLoading]);
 
   useEffect(() => {
     if (isVisible) {
@@ -126,7 +126,8 @@ const SessionPopup = () => {
     }
   };
 
-  if (hasActiveSession) return null;
+  // Don't show if session is loading or if there's already an active session
+  if (sessionLoading || hasActiveSession) return null;
 
   return (
     <AnimatePresence>

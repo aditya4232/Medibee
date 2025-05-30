@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
@@ -40,6 +39,7 @@ interface SessionContextType {
   endSession: () => void;
   shareSession: () => string;
   updateUserName: (name: string) => Promise<void>;
+  isLoading: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -47,7 +47,20 @@ const SessionContext = createContext<SessionContextType | null>(null);
 export const useSession = () => {
   const context = useContext(SessionContext);
   if (!context) {
-    throw new Error('useSession must be used within SessionProvider');
+    // Return a default state instead of throwing an error
+    return {
+      session: null,
+      hasActiveSession: false,
+      startSession: async () => {},
+      updateUserData: async () => {},
+      addMedicalRecord: async () => {},
+      addSearchQuery: async () => {},
+      trackActivity: async () => {},
+      endSession: () => {},
+      shareSession: () => '',
+      updateUserName: async () => {},
+      isLoading: true
+    };
   }
   return context;
 };
@@ -55,20 +68,31 @@ export const useSession = () => {
 const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<SessionData | null>(null);
   const [hasActiveSession, setHasActiveSession] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Check for existing session
-    const existingSessionId = localStorage.getItem('medibee_session_id');
-    if (existingSessionId) {
-      loadSession(existingSessionId);
-    }
+    // Initialize session state
+    const initializeSession = async () => {
+      try {
+        const existingSessionId = localStorage.getItem('medibee_session_id');
+        if (existingSessionId) {
+          await loadSession(existingSessionId);
+        }
+      } catch (error) {
+        console.error('Error initializing session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeSession();
   }, []);
 
   useEffect(() => {
     // Track page visits and user activity
-    if (session && hasActiveSession) {
+    if (session && hasActiveSession && !isLoading) {
       const currentPages = Array.isArray(session.visitedPages) ? session.visitedPages : [];
       const updatedSession = {
         ...session,
@@ -81,7 +105,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       // Track page visit activity
       trackActivity('page_visit', { pathname: location.pathname });
     }
-  }, [location.pathname, session, hasActiveSession]);
+  }, [location.pathname, session, hasActiveSession, isLoading]);
 
   const loadSession = async (sessionId: string) => {
     try {
@@ -265,7 +289,8 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       trackActivity,
       endSession,
       shareSession,
-      updateUserName
+      updateUserName,
+      isLoading
     }}>
       {children}
     </SessionContext.Provider>

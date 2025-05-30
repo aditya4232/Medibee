@@ -4,6 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
+interface UserActivity {
+  timestamp: string;
+  action: string;
+  page: string;
+  details?: any;
+}
+
 interface SessionData {
   sessionId: string;
   ipAddress: string;
@@ -11,21 +18,25 @@ interface SessionData {
   location: string;
   startTime: string;
   visitedPages: string[];
+  userActivities: UserActivity[];
   userData: {
     medicalRecords: any[];
     searchHistory: string[];
     userName?: string;
+    preferences?: any;
   };
   isActive: boolean;
+  lastActivity: string;
 }
 
 interface SessionContextType {
   session: SessionData | null;
   hasActiveSession: boolean;
-  startSession: (ipData: any, deviceData: any) => Promise<void>;
+  startSession: (ipData: any, deviceData: any, userName?: string) => Promise<void>;
   updateUserData: (data: any) => Promise<void>;
   addMedicalRecord: (record: any) => Promise<void>;
   addSearchQuery: (query: string) => Promise<void>;
+  trackActivity: (action: string, details?: any) => Promise<void>;
   endSession: () => void;
   shareSession: () => string;
   updateUserName: (name: string) => Promise<void>;
@@ -56,15 +67,19 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    // Track visited pages only if session exists
+    // Track page visits and user activity
     if (session && hasActiveSession) {
       const currentPages = Array.isArray(session.visitedPages) ? session.visitedPages : [];
       const updatedSession = {
         ...session,
-        visitedPages: [...new Set([...currentPages, location.pathname])]
+        visitedPages: [...new Set([...currentPages, location.pathname])],
+        lastActivity: new Date().toISOString()
       };
       setSession(updatedSession);
       updateSessionInFirebase(updatedSession);
+      
+      // Track page visit activity
+      trackActivity('page_visit', { pathname: location.pathname });
     }
   }, [location.pathname, session, hasActiveSession]);
 
@@ -73,9 +88,11 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       const sessionDoc = await getDoc(doc(db, 'sessions', sessionId));
       if (sessionDoc.exists()) {
         const sessionData = sessionDoc.data() as SessionData;
-        // Ensure visitedPages is always an array
         if (!Array.isArray(sessionData.visitedPages)) {
           sessionData.visitedPages = [];
+        }
+        if (!Array.isArray(sessionData.userActivities)) {
+          sessionData.userActivities = [];
         }
         setSession(sessionData);
         setHasActiveSession(true);
@@ -88,7 +105,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const startSession = async (ipData: any, deviceData: any) => {
+  const startSession = async (ipData: any, deviceData: any, userName?: string) => {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const sessionData: SessionData = {
       sessionId,
@@ -97,24 +114,25 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       deviceInfo: `${deviceData.type} - ${deviceData.browser}`,
       startTime: new Date().toISOString(),
       visitedPages: ['/'],
+      userActivities: [{
+        timestamp: new Date().toISOString(),
+        action: 'session_started',
+        page: '/',
+        details: { userName: userName || 'Guest User' }
+      }],
       userData: {
         medicalRecords: [],
-        searchHistory: []
+        searchHistory: [],
+        userName: userName || 'Guest User',
+        preferences: {}
       },
-      isActive: true
+      isActive: true,
+      lastActivity: new Date().toISOString()
     };
 
     try {
-      // Convert SessionData to plain object for Firebase
       const sessionForFirebase = {
-        sessionId: sessionData.sessionId,
-        ipAddress: sessionData.ipAddress,
-        deviceInfo: sessionData.deviceInfo,
-        location: sessionData.location,
-        startTime: sessionData.startTime,
-        visitedPages: sessionData.visitedPages,
-        userData: sessionData.userData,
-        isActive: sessionData.isActive
+        ...sessionData
       };
       
       await setDoc(doc(db, 'sessions', sessionId), sessionForFirebase);
@@ -128,19 +146,33 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const updateSessionInFirebase = async (sessionData: SessionData) => {
     try {
-      const sessionForFirebase = {
-        sessionId: sessionData.sessionId,
-        ipAddress: sessionData.ipAddress,
-        deviceInfo: sessionData.deviceInfo,
-        location: sessionData.location,
-        startTime: sessionData.startTime,
-        visitedPages: sessionData.visitedPages,
-        userData: sessionData.userData,
-        isActive: sessionData.isActive
-      };
-      await updateDoc(doc(db, 'sessions', sessionData.sessionId), sessionForFirebase);
+      await updateDoc(doc(db, 'sessions', sessionData.sessionId), {
+        ...sessionData,
+        lastActivity: new Date().toISOString()
+      });
     } catch (error) {
       console.error('Error updating session:', error);
+    }
+  };
+
+  const trackActivity = async (action: string, details?: any) => {
+    if (session) {
+      const activity: UserActivity = {
+        timestamp: new Date().toISOString(),
+        action,
+        page: location.pathname,
+        details
+      };
+      
+      const updatedActivities = [...(session.userActivities || []), activity];
+      const updatedSession = {
+        ...session,
+        userActivities: updatedActivities,
+        lastActivity: new Date().toISOString()
+      };
+      
+      setSession(updatedSession);
+      await updateSessionInFirebase(updatedSession);
     }
   };
 
@@ -148,22 +180,30 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (session) {
       const updatedSession = {
         ...session,
-        userData: { ...session.userData, ...data }
+        userData: { ...session.userData, ...data },
+        lastActivity: new Date().toISOString()
       };
       setSession(updatedSession);
       await updateSessionInFirebase(updatedSession);
+      await trackActivity('user_data_updated', data);
     }
   };
 
   const addMedicalRecord = async (record: any) => {
     if (session) {
-      const updatedRecords = [...session.userData.medicalRecords, { ...record, id: Date.now(), timestamp: new Date().toISOString() }];
+      const updatedRecords = [...session.userData.medicalRecords, { 
+        ...record, 
+        id: Date.now(), 
+        timestamp: new Date().toISOString() 
+      }];
       const updatedSession = {
         ...session,
-        userData: { ...session.userData, medicalRecords: updatedRecords }
+        userData: { ...session.userData, medicalRecords: updatedRecords },
+        lastActivity: new Date().toISOString()
       };
       setSession(updatedSession);
       await updateSessionInFirebase(updatedSession);
+      await trackActivity('medical_record_added', record);
     }
   };
 
@@ -172,10 +212,12 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       const updatedHistory = [...session.userData.searchHistory, query];
       const updatedSession = {
         ...session,
-        userData: { ...session.userData, searchHistory: updatedHistory }
+        userData: { ...session.userData, searchHistory: updatedHistory },
+        lastActivity: new Date().toISOString()
       };
       setSession(updatedSession);
       await updateSessionInFirebase(updatedSession);
+      await trackActivity('search_performed', { query });
     }
   };
 
@@ -183,14 +225,19 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (session) {
       const updatedSession = {
         ...session,
-        userData: { ...session.userData, userName: name }
+        userData: { ...session.userData, userName: name },
+        lastActivity: new Date().toISOString()
       };
       setSession(updatedSession);
       await updateSessionInFirebase(updatedSession);
+      await trackActivity('username_updated', { name });
     }
   };
 
   const endSession = () => {
+    if (session) {
+      trackActivity('session_ended');
+    }
     localStorage.removeItem('medibee_session_id');
     setSession(null);
     setHasActiveSession(false);
@@ -201,6 +248,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (session) {
       const sessionLink = `${window.location.origin}?session=${session.sessionId}`;
       navigator.clipboard.writeText(sessionLink);
+      trackActivity('session_shared');
       return sessionLink;
     }
     return '';
@@ -214,6 +262,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       updateUserData,
       addMedicalRecord,
       addSearchQuery,
+      trackActivity,
       endSession,
       shareSession,
       updateUserName

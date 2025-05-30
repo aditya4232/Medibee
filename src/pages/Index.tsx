@@ -15,6 +15,7 @@ import AboutProject from '@/components/AboutProject';
 import AboutDeveloper from '@/components/AboutDeveloper';
 import SessionActions from '@/components/SessionActions';
 import SessionPopup from '@/components/SessionPopup';
+import SessionIndicator from '@/components/SessionIndicator';
 import MedicalDisclaimer from '@/components/MedicalDisclaimer';
 import { useSession } from '@/components/SessionProvider';
 
@@ -27,6 +28,7 @@ const Index = () => {
       <ThemeSwitcher />
       <Navigation />
       <SessionPopup />
+      <SessionIndicator />
       <Hero />
 
       {/* Show session actions only when user has active session */}

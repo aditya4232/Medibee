@@ -2,15 +2,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart3, FileText, Brain, Menu, X, Settings, Shield } from 'lucide-react';
+import { Home, BarChart3, FileText, Brain, Menu, X, Settings, Shield, LogOut } from 'lucide-react';
 import { useSession } from './SessionProvider';
 import SessionSettings from './SessionSettings';
+import { useToast } from '@/hooks/use-toast';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const location = useLocation();
-  const { session } = useSession();
+  const { session, hasActiveSession, endSession } = useSession();
+  const { toast } = useToast();
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
@@ -19,6 +21,15 @@ const Navigation = () => {
     { path: '/reports', label: 'Reports', icon: FileText },
     { path: '/privacy', label: 'Privacy', icon: Shield },
   ];
+
+  const handleEndSession = () => {
+    endSession();
+    setIsOpen(false);
+    toast({
+      title: "Session Ended",
+      description: "Your session has been terminated securely.",
+    });
+  };
 
   return (
     <>
@@ -58,13 +69,31 @@ const Navigation = () => {
                 </Link>
               );
             })}
-            {session && (
-              <button
-                onClick={() => setShowSettings(true)}
-                className="p-2 text-foreground hover:text-medical-blue transition-colors rounded-lg hover:bg-white/10"
-              >
-                <Settings size={20} />
-              </button>
+
+            {/* Session Controls */}
+            {hasActiveSession && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-lg glass border border-green-500/30">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-foreground">
+                    {session?.userData.userName || 'Active'}
+                  </span>
+                </div>
+                
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 text-foreground hover:text-medical-blue transition-colors rounded-lg hover:bg-white/10"
+                >
+                  <Settings size={20} />
+                </button>
+
+                <button
+                  onClick={handleEndSession}
+                  className="p-2 text-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-500/10"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
             )}
           </div>
 
@@ -105,17 +134,37 @@ const Navigation = () => {
                   </Link>
                 );
               })}
-              {session && (
-                <button
-                  onClick={() => {
-                    setShowSettings(true);
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-foreground hover:text-medical-blue hover:bg-white/10 w-full"
-                >
-                  <Settings size={18} />
-                  <span>Settings</span>
-                </button>
+
+              {hasActiveSession && (
+                <>
+                  <div className="border-t border-white/20 pt-2 mt-2">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-lg glass">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-foreground">
+                        Session: {session?.userData.userName || 'Active'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      setShowSettings(true);
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-foreground hover:text-medical-blue hover:bg-white/10 w-full"
+                  >
+                    <Settings size={18} />
+                    <span>Settings</span>
+                  </button>
+
+                  <button
+                    onClick={handleEndSession}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-foreground hover:text-red-500 hover:bg-red-500/10 w-full"
+                  >
+                    <LogOut size={18} />
+                    <span>End Session</span>
+                  </button>
+                </>
               )}
             </div>
           </motion.div>

@@ -1,6 +1,6 @@
 
 import { motion } from 'framer-motion';
-import { X, Share, LogOut, Save, Clock, MapPin, Monitor } from 'lucide-react';
+import { X, Share, LogOut, Clock, MapPin, Monitor } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSession } from './SessionProvider';
@@ -11,7 +11,7 @@ interface SessionSettingsProps {
 }
 
 const SessionSettings = ({ onClose }: SessionSettingsProps) => {
-  const { session, endSession, shareSession, saveSessionWithGoogle } = useSession();
+  const { session, endSession, shareSession } = useSession();
   const { toast } = useToast();
 
   const handleShareSession = () => {
@@ -63,7 +63,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                 <Clock className="h-5 w-5 text-medical-blue" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Session Started</p>
-                  <p className="text-sm text-muted-foreground">{session.startTime}</p>
+                  <p className="text-sm text-muted-foreground">{new Date(session.startTime).toLocaleString()}</p>
                 </div>
               </div>
               
@@ -91,15 +91,6 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
               >
                 <Share className="w-4 h-4 mr-2" />
                 Share Session Link
-              </Button>
-              
-              <Button
-                onClick={saveSessionWithGoogle}
-                variant="outline"
-                className="w-full glass border-white/20"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                Save with Google
               </Button>
               
               <Button

@@ -73,6 +73,10 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       const sessionDoc = await getDoc(doc(db, 'sessions', sessionId));
       if (sessionDoc.exists()) {
         const sessionData = sessionDoc.data() as SessionData;
+        // Ensure visitedPages is always an array
+        if (!Array.isArray(sessionData.visitedPages)) {
+          sessionData.visitedPages = [];
+        }
         setSession(sessionData);
         setHasActiveSession(true);
       } else {
@@ -101,7 +105,19 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     };
 
     try {
-      await setDoc(doc(db, 'sessions', sessionId), sessionData);
+      // Convert SessionData to plain object for Firebase
+      const sessionForFirebase = {
+        sessionId: sessionData.sessionId,
+        ipAddress: sessionData.ipAddress,
+        deviceInfo: sessionData.deviceInfo,
+        location: sessionData.location,
+        startTime: sessionData.startTime,
+        visitedPages: sessionData.visitedPages,
+        userData: sessionData.userData,
+        isActive: sessionData.isActive
+      };
+      
+      await setDoc(doc(db, 'sessions', sessionId), sessionForFirebase);
       localStorage.setItem('medibee_session_id', sessionId);
       setSession(sessionData);
       setHasActiveSession(true);
@@ -112,7 +128,17 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const updateSessionInFirebase = async (sessionData: SessionData) => {
     try {
-      await updateDoc(doc(db, 'sessions', sessionData.sessionId), sessionData);
+      const sessionForFirebase = {
+        sessionId: sessionData.sessionId,
+        ipAddress: sessionData.ipAddress,
+        deviceInfo: sessionData.deviceInfo,
+        location: sessionData.location,
+        startTime: sessionData.startTime,
+        visitedPages: sessionData.visitedPages,
+        userData: sessionData.userData,
+        isActive: sessionData.isActive
+      };
+      await updateDoc(doc(db, 'sessions', sessionData.sessionId), sessionForFirebase);
     } catch (error) {
       console.error('Error updating session:', error);
     }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -71,6 +71,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const lastTrackedPage = useRef<string>('');
 
   useEffect(() => {
     // Initialize session state
@@ -92,34 +93,67 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Track page visits and user activity
-    if (session && hasActiveSession && !isLoading) {
-      const currentPages = Array.isArray(session.visitedPages) ? session.visitedPages : [];
-      const updatedSession = {
-        ...session,
-        visitedPages: [...new Set([...currentPages, location.pathname])],
-        lastActivity: new Date().toISOString()
-      };
-      setSession(updatedSession);
-      updateSessionInFirebase(updatedSession);
-      
-      // Track page visit activity
-      trackActivity('page_visit', { pathname: location.pathname });
+    if (session && hasActiveSession && !isLoading && location.pathname !== lastTrackedPage.current) {
+      lastTrackedPage.current = location.pathname;
+
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const currentPages = Array.isArray(prevSession.visitedPages) ? prevSession.visitedPages : [];
+
+        // Only update if the current page is not already in visitedPages
+        if (!currentPages.includes(location.pathname)) {
+          const updatedSession = {
+            ...prevSession,
+            visitedPages: [...currentPages, location.pathname],
+            lastActivity: new Date().toISOString()
+          };
+
+          // Update Firebase asynchronously
+          updateSessionInFirebase(updatedSession).catch(console.error);
+
+          return updatedSession;
+        }
+
+        return prevSession;
+      });
     }
-  }, [location.pathname, session, hasActiveSession, isLoading]);
+  }, [location.pathname, hasActiveSession, isLoading]);
 
   const loadSession = async (sessionId: string) => {
     try {
       const sessionDoc = await getDoc(doc(db, 'sessions', sessionId));
       if (sessionDoc.exists()) {
         const sessionData = sessionDoc.data() as SessionData;
+
+        // Check if session is expired (7 hours = 25200000 milliseconds)
+        const sessionStart = new Date(sessionData.startTime);
+        const now = new Date();
+        const sessionAge = now.getTime() - sessionStart.getTime();
+        const sevenHours = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+
+        if (sessionAge > sevenHours && !sessionData.userData.isPermanentUser) {
+          // Session expired, remove it
+          localStorage.removeItem('medibee_session_id');
+          console.log('Session expired after 7 hours');
+          return;
+        }
+
         if (!Array.isArray(sessionData.visitedPages)) {
           sessionData.visitedPages = [];
         }
         if (!Array.isArray(sessionData.userActivities)) {
           sessionData.userActivities = [];
         }
+
+        // Update last activity to current time
+        sessionData.lastActivity = new Date().toISOString();
+
         setSession(sessionData);
         setHasActiveSession(true);
+
+        // Update Firebase with current activity
+        updateSessionInFirebase(sessionData).catch(console.error);
       } else {
         localStorage.removeItem('medibee_session_id');
       }
@@ -148,7 +182,8 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
         medicalRecords: [],
         searchHistory: [],
         userName: userName || 'Guest User',
-        preferences: {}
+        preferences: {},
+        isPermanentUser: false
       },
       isActive: true,
       lastActivity: new Date().toISOString()
@@ -158,7 +193,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       const sessionForFirebase = {
         ...sessionData
       };
-      
+
       await setDoc(doc(db, 'sessions', sessionId), sessionForFirebase);
       localStorage.setItem('medibee_session_id', sessionId);
       setSession(sessionData);
@@ -187,73 +222,104 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
         page: location.pathname,
         details
       };
-      
-      const updatedActivities = [...(session.userActivities || []), activity];
-      const updatedSession = {
-        ...session,
-        userActivities: updatedActivities,
-        lastActivity: new Date().toISOString()
-      };
-      
-      setSession(updatedSession);
-      await updateSessionInFirebase(updatedSession);
+
+      // Use functional update to avoid dependency on session state
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const updatedActivities = [...(prevSession.userActivities || []), activity];
+        const updatedSession = {
+          ...prevSession,
+          userActivities: updatedActivities,
+          lastActivity: new Date().toISOString()
+        };
+
+        // Update Firebase asynchronously without waiting
+        updateSessionInFirebase(updatedSession).catch(console.error);
+
+        return updatedSession;
+      });
     }
   };
 
   const updateUserData = async (data: any) => {
     if (session) {
-      const updatedSession = {
-        ...session,
-        userData: { ...session.userData, ...data },
-        lastActivity: new Date().toISOString()
-      };
-      setSession(updatedSession);
-      await updateSessionInFirebase(updatedSession);
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const updatedSession = {
+          ...prevSession,
+          userData: { ...prevSession.userData, ...data },
+          lastActivity: new Date().toISOString()
+        };
+
+        updateSessionInFirebase(updatedSession).catch(console.error);
+        return updatedSession;
+      });
+
       await trackActivity('user_data_updated', data);
     }
   };
 
   const addMedicalRecord = async (record: any) => {
     if (session) {
-      const updatedRecords = [...session.userData.medicalRecords, { 
-        ...record, 
-        id: Date.now(), 
-        timestamp: new Date().toISOString() 
-      }];
-      const updatedSession = {
-        ...session,
-        userData: { ...session.userData, medicalRecords: updatedRecords },
-        lastActivity: new Date().toISOString()
-      };
-      setSession(updatedSession);
-      await updateSessionInFirebase(updatedSession);
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const updatedRecords = [...prevSession.userData.medicalRecords, {
+          ...record,
+          id: Date.now(),
+          timestamp: new Date().toISOString()
+        }];
+        const updatedSession = {
+          ...prevSession,
+          userData: { ...prevSession.userData, medicalRecords: updatedRecords },
+          lastActivity: new Date().toISOString()
+        };
+
+        updateSessionInFirebase(updatedSession).catch(console.error);
+        return updatedSession;
+      });
+
       await trackActivity('medical_record_added', record);
     }
   };
 
   const addSearchQuery = async (query: string) => {
     if (session) {
-      const updatedHistory = [...session.userData.searchHistory, query];
-      const updatedSession = {
-        ...session,
-        userData: { ...session.userData, searchHistory: updatedHistory },
-        lastActivity: new Date().toISOString()
-      };
-      setSession(updatedSession);
-      await updateSessionInFirebase(updatedSession);
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const updatedHistory = [...prevSession.userData.searchHistory, query];
+        const updatedSession = {
+          ...prevSession,
+          userData: { ...prevSession.userData, searchHistory: updatedHistory },
+          lastActivity: new Date().toISOString()
+        };
+
+        updateSessionInFirebase(updatedSession).catch(console.error);
+        return updatedSession;
+      });
+
       await trackActivity('search_performed', { query });
     }
   };
 
   const updateUserName = async (name: string) => {
     if (session) {
-      const updatedSession = {
-        ...session,
-        userData: { ...session.userData, userName: name },
-        lastActivity: new Date().toISOString()
-      };
-      setSession(updatedSession);
-      await updateSessionInFirebase(updatedSession);
+      setSession(prevSession => {
+        if (!prevSession) return prevSession;
+
+        const updatedSession = {
+          ...prevSession,
+          userData: { ...prevSession.userData, userName: name },
+          lastActivity: new Date().toISOString()
+        };
+
+        updateSessionInFirebase(updatedSession).catch(console.error);
+        return updatedSession;
+      });
+
       await trackActivity('username_updated', { name });
     }
   };

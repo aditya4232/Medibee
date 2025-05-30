@@ -15,9 +15,10 @@ import AboutProject from '@/components/AboutProject';
 import AboutDeveloper from '@/components/AboutDeveloper';
 import SessionActions from '@/components/SessionActions';
 import SessionPopup from '@/components/SessionPopup';
-import SessionIndicator from '@/components/SessionIndicator';
+
 import MedicalDisclaimer from '@/components/MedicalDisclaimer';
 import LoadingSpinner from '@/components/LoadingSpinner';
+
 import { useSession } from '@/components/SessionProvider';
 
 const Index = () => {
@@ -37,46 +38,16 @@ const Index = () => {
       <ThemeSwitcher />
       <Navigation />
       <SessionPopup />
-      <SessionIndicator />
       <Hero />
 
       {/* Show session actions only when user has active session */}
       {hasActiveSession && <SessionActions />}
 
-      {/* Only show static content when no active session */}
+      {/* Only show About Project when no active session */}
       {!hasActiveSession && (
         <>
-          <AboutSection />
-          <WorkingSection />
-          <AimSection />
-          <MedicalHurdlesIndia />
           <AboutProject />
-          <AboutDeveloper />
-          <MedicalDisclaimer />
         </>
-      )}
-
-      {/* Show health metrics only with active session and data */}
-      {hasActiveSession && (
-        <section className="relative z-10 py-20 px-4">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl font-bold text-foreground mb-4">
-                Your Health Dashboard
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                AI-powered insights from your medical data
-              </p>
-            </motion.div>
-            
-            <HealthMetrics />
-          </div>
-        </section>
       )}
 
       {/* Features Section - Always show */}

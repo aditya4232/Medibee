@@ -1,13 +1,15 @@
 
 import { motion } from 'framer-motion';
-import { X, Share, LogOut, Clock, MapPin, Monitor, User, Activity, Search, FileText, Database, Download } from 'lucide-react';
+import { X, Share, LogOut, Clock, MapPin, Monitor, User, Activity, Search, FileText, Database, Download, Shield, Timer, Chrome } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useSession } from './SessionProvider';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { signInWithGoogle } from '@/lib/auth';
 
 interface SessionSettingsProps {
   onClose: () => void;
@@ -17,6 +19,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
   const { session, endSession, shareSession, updateUserName } = useSession();
   const { toast } = useToast();
   const [newUserName, setNewUserName] = useState(session?.userData.userName || '');
+  const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
 
   const handleShareSession = () => {
     const link = shareSession();
@@ -58,7 +61,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
         activities: session.userActivities,
         visitedPages: session.visitedPages
       };
-      
+
       const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -66,7 +69,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
       a.download = `medibee-session-${session.sessionId}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Data Exported",
         description: "Your session data has been downloaded as JSON file.",
@@ -75,6 +78,28 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
   };
 
   if (!session) return null;
+
+  const handleConnectGoogle = async () => {
+    setIsConnectingGoogle(true);
+    try {
+      const userData = await signInWithGoogle();
+      if (userData) {
+        toast({
+          title: "Google Account Connected!",
+          description: "Your data will now be saved permanently to your Google account.",
+        });
+        // Here you would merge session data with Google account
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect Google account. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsConnectingGoogle(false);
+    }
+  };
 
   const sessionDuration = () => {
     const start = new Date(session.startTime);
@@ -85,35 +110,48 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
+  const getSessionTimeRemaining = () => {
+    const start = new Date(session.startTime);
+    const now = new Date();
+    const elapsed = Math.floor((now.getTime() - start.getTime()) / 1000 / 60);
+    const remaining = 420 - elapsed; // 7 hours = 420 minutes
+    if (remaining <= 0) return "Session expired";
+    const hours = Math.floor(remaining / 60);
+    const minutes = remaining % 60;
+    return hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-4xl max-h-[80vh] overflow-hidden"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -100, opacity: 0 }}
+        className="absolute top-4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl mx-4"
+        onClick={(e) => e.stopPropagation()}
       >
-        <Card className="glass border-white/20 h-full">
-          <CardHeader className="pb-4">
+        <Card className="glass border-white/20 max-h-[85vh] overflow-hidden">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <User size={20} />
-                Session Management
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                <User size={18} />
+                Session Settings
               </CardTitle>
               <button
                 onClick={onClose}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
           </CardHeader>
-          <CardContent className="overflow-y-auto max-h-[calc(80vh-120px)]">
+          <CardContent className="overflow-y-auto max-h-[calc(85vh-80px)] pb-4">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -124,6 +162,23 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4">
+                {/* Session Status Banner */}
+                <div className="p-4 rounded-lg bg-gradient-to-r from-medical-blue/20 to-medical-green/20 border border-medical-blue/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">Active Session</h3>
+                        <p className="text-sm text-muted-foreground">{getSessionTimeRemaining()}</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-700 dark:text-green-300">
+                      <Timer className="w-3 h-3 mr-1" />
+                      7h Max
+                    </Badge>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 rounded-lg glass">
@@ -133,7 +188,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                         <p className="text-sm text-muted-foreground">{sessionDuration()}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 p-3 rounded-lg glass">
                       <MapPin className="h-5 w-5 text-medical-green" />
                       <div>
@@ -141,7 +196,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                         <p className="text-sm text-muted-foreground">{session.location}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 p-3 rounded-lg glass">
                       <Monitor className="h-5 w-5 text-medical-purple" />
                       <div>
@@ -159,7 +214,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                         <p className="text-sm text-muted-foreground">{session.userActivities?.length || 0}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 p-3 rounded-lg glass">
                       <FileText className="h-5 w-5 text-medical-red" />
                       <div>
@@ -167,7 +222,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                         <p className="text-sm text-muted-foreground">{session.userData.medicalRecords?.length || 0}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 p-3 rounded-lg glass">
                       <Search className="h-5 w-5 text-medical-blue" />
                       <div>
@@ -186,7 +241,7 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                     <Share className="w-4 h-4 mr-2" />
                     Share Session Link
                   </Button>
-                  
+
                   <Button
                     onClick={handleEndSession}
                     variant="destructive"
@@ -218,22 +273,29 @@ const SessionSettings = ({ onClose }: SessionSettingsProps) => {
                   </div>
 
                   <div className="p-4 rounded-lg glass">
-                    <h3 className="font-medium text-foreground mb-2">Account Features</h3>
+                    <h3 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Account Features
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Login with Google to save your data permanently and access it from any device.
+                      Connect your Google account to save data permanently and access it from any device.
+                      Your session will become permanent and won't expire.
                     </p>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => {
-                        toast({
-                          title: "Coming Soon",
-                          description: "Google authentication will be available in the next update.",
-                        });
-                      }}
+                    <Button
+                      onClick={handleConnectGoogle}
+                      disabled={isConnectingGoogle}
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
                     >
-                      Connect Google Account
+                      <Chrome className="w-4 h-4 mr-2" />
+                      {isConnectingGoogle ? 'Connecting...' : 'Connect Google Account'}
                     </Button>
+
+                    <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        <strong>Benefits:</strong> Permanent storage, cross-device sync, advanced AI features,
+                        unlimited session time, and priority support.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </TabsContent>

@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    hmr: {
+      overlay: false
+    }
   },
   plugins: [
     react(),
@@ -19,4 +22,23 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          firebase: ['firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/analytics'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-button', '@radix-ui/react-toast'],
+          motion: ['framer-motion'],
+          router: ['react-router-dom']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'firebase/app', 'firebase/firestore']
+  }
 }));

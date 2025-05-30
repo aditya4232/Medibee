@@ -22,7 +22,7 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-40 glass mx-4 mt-4 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border border-white/20">
+      <nav className="fixed top-0 left-0 right-0 z-30 glass mx-4 mt-4 rounded-2xl backdrop-blur-lg bg-white/20 dark:bg-black/20 border border-white/30">
         <div className="flex items-center justify-between max-w-7xl mx-auto p-4">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -83,7 +83,7 @@ const Navigation = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-white/20 p-4 backdrop-blur-xl bg-white/5 dark:bg-black/5"
+            className="md:hidden border-t border-white/20 p-4 backdrop-blur-lg bg-white/10 dark:bg-black/10"
           >
             <div className="space-y-2">
               {navItems.map((item) => {

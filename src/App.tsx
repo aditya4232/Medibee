@@ -11,7 +11,6 @@ import Analysis from "./pages/Analysis";
 import Reports from "./pages/Reports";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
-import IPAddressPopup from "./components/IPAddressPopup";
 import SessionProvider from "./components/SessionProvider";
 
 const queryClient = new QueryClient({
@@ -29,7 +28,6 @@ const App: React.FC = () => {
       <TooltipProvider>
         <BrowserRouter>
           <SessionProvider>
-            <IPAddressPopup />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />

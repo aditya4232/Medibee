@@ -1,0 +1,249 @@
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, User, MapPin, Monitor, Shield } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useSession } from './SessionProvider';
+import { useToast } from '@/hooks/use-toast';
+
+interface DeviceInfo {
+  type: string;
+  browser: string;
+  os: string;
+}
+
+interface IPData {
+  ip: string;
+  location: string;
+  country: string;
+  city: string;
+}
+
+const SessionPopup = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
+  const [ipData, setIPData] = useState<IPData | null>(null);
+  const { startSession, hasActiveSession } = useSession();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Show popup only if no active session
+    if (!hasActiveSession) {
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasActiveSession]);
+
+  useEffect(() => {
+    // Get device info
+    const getDeviceInfo = () => {
+      const userAgent = navigator.userAgent;
+      let deviceType = 'Desktop';
+      let browser = 'Unknown';
+      let os = 'Unknown';
+
+      // Detect device type
+      if (/Mobile|Android|iPhone|iPad/i.test(userAgent)) {
+        deviceType = 'Mobile';
+      } else if (/Tablet|iPad/i.test(userAgent)) {
+        deviceType = 'Tablet';
+      }
+
+      // Detect browser
+      if (userAgent.includes('Chrome')) browser = 'Chrome';
+      else if (userAgent.includes('Firefox')) browser = 'Firefox';
+      else if (userAgent.includes('Safari')) browser = 'Safari';
+      else if (userAgent.includes('Edge')) browser = 'Edge';
+
+      // Detect OS
+      if (userAgent.includes('Windows')) os = 'Windows';
+      else if (userAgent.includes('Mac')) os = 'macOS';
+      else if (userAgent.includes('Linux')) os = 'Linux';
+      else if (userAgent.includes('Android')) os = 'Android';
+      else if (userAgent.includes('iOS')) os = 'iOS';
+
+      setDeviceInfo({ type: deviceType, browser, os });
+    };
+
+    // Get IP and location (using free service)
+    const getIPData = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        setIPData({
+          ip: data.ip || 'Unknown',
+          location: `${data.city || 'Unknown'}, ${data.country_name || 'Unknown'}`,
+          country: data.country_name || 'Unknown',
+          city: data.city || 'Unknown'
+        });
+      } catch (error) {
+        console.log('Could not fetch IP data:', error);
+        setIPData({
+          ip: 'Unknown',
+          location: 'Unknown Location',
+          country: 'Unknown',
+          city: 'Unknown'
+        });
+      }
+    };
+
+    getDeviceInfo();
+    getIPData();
+  }, []);
+
+  const handleStartSession = async () => {
+    if (!deviceInfo || !ipData) {
+      toast({
+        title: "Error",
+        description: "Please wait for device information to load.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await startSession(ipData, deviceInfo);
+      if (userName.trim()) {
+        // Update user name if provided
+        // This will be handled in the session provider
+      }
+      toast({
+        title: "Session Started!",
+        description: "Welcome to MediBee. Your secure session is now active.",
+      });
+      setIsVisible(false);
+    } catch (error) {
+      console.error('Error starting session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start session. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isVisible || hasActiveSession) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: "spring", duration: 0.5 }}
+        >
+          <Card className="glass border-white/20 max-w-md w-full shadow-2xl">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-medical-gradient rounded-xl flex items-center justify-center">
+                    <span className="text-xl font-bold text-white">M</span>
+                  </div>
+                  <div>
+                    <CardTitle className="text-foreground">Welcome to MediBee</CardTitle>
+                    <p className="text-sm text-muted-foreground">Your AI Medical Assistant</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsVisible(false)}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Start Your Secure Health Session
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Get personalized medical insights with AI-powered analysis. Your data is encrypted and secure.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg glass">
+                  <Shield className="h-5 w-5 text-medical-green" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Privacy First</p>
+                    <p className="text-xs text-muted-foreground">End-to-end encrypted sessions</p>
+                  </div>
+                </div>
+                
+                {deviceInfo && (
+                  <div className="flex items-center gap-3 p-3 rounded-lg glass">
+                    <Monitor className="h-5 w-5 text-medical-blue" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Device</p>
+                      <p className="text-xs text-muted-foreground">{deviceInfo.type} - {deviceInfo.browser}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {ipData && (
+                  <div className="flex items-center gap-3 p-3 rounded-lg glass">
+                    <MapPin className="h-5 w-5 text-medical-purple" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Location</p>
+                      <p className="text-xs text-muted-foreground">{ipData.location}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Name (Optional)
+                  </label>
+                  <Input
+                    placeholder="Enter your name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="glass border-white/20 placeholder-muted-foreground"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleStartSession}
+                  disabled={isLoading || !deviceInfo || !ipData}
+                  className="w-full bg-medical-gradient hover:opacity-90 text-white font-semibold"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  {isLoading ? 'Starting Session...' : 'Start Secure Session'}
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  By starting a session, you agree to our{' '}
+                  <button className="text-medical-blue hover:underline">Privacy Policy</button>
+                  {' '}and{' '}
+                  <button className="text-medical-blue hover:underline">Terms of Service</button>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+export default SessionPopup;

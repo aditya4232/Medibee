@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Analysis from "./pages/Analysis";
 import Reports from "./pages/Reports";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import IPAddressPopup from "./components/IPAddressPopup";
 import SessionProvider from "./components/SessionProvider";
@@ -34,6 +35,7 @@ const App: React.FC = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/analysis" element={<Analysis />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SessionProvider>

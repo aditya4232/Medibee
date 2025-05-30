@@ -101,16 +101,30 @@
     @apply bg-background text-foreground font-inter;
   }
 
-  /* Custom glass effect */
+  /* Enhanced glass effect with better blur */
   .glass {
-    backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
   }
 
   .dark .glass {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Enhanced backdrop blur utilities */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+  }
+
+  .backdrop-blur-2xl {
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
   }
 
   /* Medical gradient */
@@ -131,41 +145,49 @@
   .bg-medical-red\/20 { background-color: rgb(239, 68, 68, 0.2); }
   .bg-medical-amber\/20 { background-color: rgb(245, 158, 11, 0.2); }
 
-  /* Medical icons glow effect */
+  /* Enhanced medical icons glow effect */
   .medical-glow {
-    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.4));
   }
 
   .dark .medical-glow {
-    filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.6));
+    filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.7));
   }
 
-  /* Neon shadow effects */
+  /* Enhanced neon shadow effects */
   .shadow-neon-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
   }
 
   .shadow-glass {
-    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    box-shadow: 
+      0 8px 32px rgba(31, 38, 135, 0.37),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+
+  .dark .shadow-glass {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   ::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.5);
-    border-radius: 3px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6));
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.8);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
   }
 
   /* Terminal-style text */
@@ -177,11 +199,24 @@
   /* Responsive optimizations */
   @media (max-width: 768px) {
     .glass {
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
     }
     
     .medical-glow {
-      filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+      filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+    }
+
+    .backdrop-blur-xl {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .glass {
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
     }
   }
 
@@ -197,5 +232,25 @@
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+  }
+
+  /* Enhanced animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Focus styles for accessibility */
+  .focus-visible:focus-visible {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: 2px;
   }
 }

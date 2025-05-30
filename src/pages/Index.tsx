@@ -14,6 +14,8 @@ import AimSection from '@/components/AimSection';
 import AboutProject from '@/components/AboutProject';
 import AboutDeveloper from '@/components/AboutDeveloper';
 import SessionActions from '@/components/SessionActions';
+import SessionPopup from '@/components/SessionPopup';
+import MedicalDisclaimer from '@/components/MedicalDisclaimer';
 import { useSession } from '@/components/SessionProvider';
 
 const Index = () => {
@@ -24,6 +26,7 @@ const Index = () => {
       <DNABackground />
       <ThemeSwitcher />
       <Navigation />
+      <SessionPopup />
       <Hero />
 
       {/* Show session actions only when user has active session */}
@@ -38,6 +41,7 @@ const Index = () => {
           <MedicalHurdlesIndia />
           <AboutProject />
           <AboutDeveloper />
+          <MedicalDisclaimer />
         </>
       )}
 

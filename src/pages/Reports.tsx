@@ -1,47 +1,59 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Eye, Calendar, Search, Upload, Brain } from 'lucide-react';
+import { FileText, Download, Eye, Calendar, Filter, Search, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import Navigation from '@/components/Navigation';
 import SessionIndicator from '@/components/SessionIndicator';
 import { useSession } from '@/components/SessionProvider';
+import { useNavigate } from 'react-router-dom';
 
 const Reports = () => {
+  const { session, trackActivity } = useSession();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const { session, hasActiveSession } = useSession();
-  const [filteredReports, setFilteredReports] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
 
-  useEffect(() => {
-    if (session?.userData?.medicalRecords) {
-      const filtered = session.userData.medicalRecords.filter(record =>
-        record.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.type?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredReports(filtered);
-    }
-  }, [session, searchTerm]);
-
-  const getReportIcon = (type: string) => {
-    switch (type) {
-      case 'uploaded_document': return FileText;
-      case 'lab_report': return Brain;
-      case 'prescription': return FileText;
-      default: return FileText;
-    }
+  const medicalRecords = session?.userData?.medicalRecords || [];
+  
+  const handleNewReport = () => {
+    trackActivity('new_report_clicked');
+    navigate('/analysis');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'analyzed': return 'text-medical-green bg-medical-green/20';
-      case 'processing': return 'text-medical-amber bg-medical-amber/20';
-      default: return 'text-medical-blue bg-medical-blue/20';
+  const mockReports = [
+    {
+      id: 1,
+      title: 'Blood Test Results',
+      date: '2024-05-15',
+      type: 'Laboratory',
+      status: 'Normal',
+      size: '2.4 MB'
+    },
+    {
+      id: 2,
+      title: 'Chest X-Ray Report',
+      date: '2024-05-10',
+      type: 'Imaging',
+      status: 'Reviewed',
+      size: '1.8 MB'
+    },
+    {
+      id: 3,
+      title: 'Prescription Analysis',
+      date: '2024-05-08',
+      type: 'Prescription',
+      status: 'Analyzed',
+      size: '0.5 MB'
     }
-  };
+  ];
+
+  const reports = medicalRecords.length > 0 ? medicalRecords : mockReports;
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -57,114 +69,156 @@ const Reports = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Medical Reports
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              View and manage your uploaded medical documents
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
+                  Medical Reports
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                  View and manage your medical documents and analysis results
+                </p>
+              </div>
+              <Button
+                onClick={handleNewReport}
+                className="bg-medical-gradient hover:opacity-90 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Analysis
+              </Button>
+            </div>
           </motion.div>
 
-          {/* Search */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <Card className="glass border-white/20">
-              <CardContent className="p-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          {/* Search and Filters */}
+          <Card className="glass border-white/20 mb-6">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Search your medical reports..."
+                    placeholder="Search reports..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 glass border-white/20"
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <Button variant="outline" className="glass border-white/20">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+                <Button variant="outline" className="glass border-white/20">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Date Range
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Reports */}
-          {filteredReports.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredReports.map((report, index) => {
-                const Icon = getReportIcon(report.type);
-                return (
-                  <motion.div
-                    key={report.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <Card className="glass border-white/20 hover:shadow-neon-blue transition-all duration-300">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <Icon className="h-8 w-8 text-medical-blue medical-glow" />
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor('analyzed')}`}>
-                            analyzed
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="glass border-white/20">
+              <TabsTrigger value="all">All Reports ({reports.length})</TabsTrigger>
+              <TabsTrigger value="laboratory">Laboratory</TabsTrigger>
+              <TabsTrigger value="imaging">Imaging</TabsTrigger>
+              <TabsTrigger value="prescription">Prescriptions</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="all" className="space-y-4">
+              {reports.length === 0 ? (
+                <Card className="glass border-white/20">
+                  <CardContent className="p-12 text-center">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">No Reports Yet</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Upload your first medical document to get started with AI analysis
+                    </p>
+                    <Button
+                      onClick={handleNewReport}
+                      className="bg-medical-gradient hover:opacity-90 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Upload First Report
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {reports.map((report: any) => (
+                    <Card key={report.id} className="glass border-white/20 hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-medical-blue/20 rounded-lg flex items-center justify-center">
+                              <FileText className="w-6 h-6 text-medical-blue" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-foreground">{report.title}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>{report.type}</span>
+                                <span>•</span>
+                                <span>{report.date}</span>
+                                <span>•</span>
+                                <span>{report.size}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <CardTitle className="text-lg text-foreground">{report.fileName}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{report.type}</p>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              {new Date(report.timestamp).toLocaleDateString()}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              report.status === 'Normal' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                              report.status === 'Reviewed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                              'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                            }`}>
+                              {report.status}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              {(report.fileSize / 1024 / 1024).toFixed(1)} MB
-                            </span>
-                          </div>
-                          <div className="flex gap-2 pt-2">
-                            <Button size="sm" className="bg-medical-blue hover:bg-blue-600 text-white flex-1">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
+                            <Button size="sm" variant="outline" className="glass border-white/20">
+                              <Eye className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="outline" className="glass border-white/20">
-                              <Download className="h-4 w-4" />
+                              <Download className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-center py-12"
-            >
-              <Card className="glass border-white/20 max-w-md mx-auto">
-                <CardContent className="p-12">
-                  <Upload className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-foreground mb-2">No Reports Found</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Start by uploading your first medical document
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="laboratory">
+              <Card className="glass border-white/20">
+                <CardContent className="p-12 text-center">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Laboratory Reports</h3>
+                  <p className="text-muted-foreground">
+                    Upload blood tests, urine analysis, or other lab reports
                   </p>
-                  <Button
-                    onClick={() => window.location.href = '/'}
-                    className="bg-medical-gradient text-white"
-                  >
-                    Upload Document
-                  </Button>
                 </CardContent>
               </Card>
-            </motion.div>
-          )}
+            </TabsContent>
+
+            <TabsContent value="imaging">
+              <Card className="glass border-white/20">
+                <CardContent className="p-12 text-center">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Imaging Reports</h3>
+                  <p className="text-muted-foreground">
+                    Upload X-rays, MRI, CT scans, or ultrasound reports
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="prescription">
+              <Card className="glass border-white/20">
+                <CardContent className="p-12 text-center">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Prescription Analysis</h3>
+                  <p className="text-muted-foreground">
+                    Upload prescriptions for AI-powered medicine analysis
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

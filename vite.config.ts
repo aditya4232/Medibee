@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -30,7 +31,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           firebase: ['firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/analytics'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-button', '@radix-ui/react-toast'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-toast'],
           motion: ['framer-motion'],
           router: ['react-router-dom']
         }

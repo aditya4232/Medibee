@@ -1,184 +1,209 @@
 
 import { motion } from 'framer-motion';
-import { Shield, Lock, Eye, Database, Globe, UserCheck } from 'lucide-react';
+import { Shield, Lock, Eye, UserCheck, Database, Globe } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Navigation from '@/components/Navigation';
+import { Button } from '@/components/ui/button';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
+import Navigation from '@/components/Navigation';
+import { useNavigate } from 'react-router-dom';
 
 const PrivacyPolicy = () => {
-  const sections = [
-    {
-      icon: Database,
-      title: "Data Collection",
-      content: [
-        "We collect only essential information needed to provide our medical assistance services.",
-        "Medical records and prescriptions you upload are processed securely.",
-        "Session data includes device information and location for security purposes.",
-        "No personal identifying information is required to use our basic services."
-      ]
-    },
-    {
-      icon: Lock,
-      title: "Data Security",
-      content: [
-        "All data is encrypted using industry-standard encryption protocols.",
-        "Medical information is stored securely in Firebase with end-to-end encryption.",
-        "Session data is automatically deleted after 30 days of inactivity.",
-        "We implement strict access controls and security monitoring."
-      ]
-    },
-    {
-      icon: Eye,
-      title: "Data Usage",
-      content: [
-        "Your medical data is used solely to provide AI-powered health insights.",
-        "We do not sell, rent, or share your personal health information.",
-        "Anonymized data may be used to improve our AI models (opt-out available).",
-        "You have full control over your data and can delete it anytime."
-      ]
-    },
-    {
-      icon: UserCheck,
-      title: "Your Rights",
-      content: [
-        "Right to access all data we have about you.",
-        "Right to correct or update your information.",
-        "Right to delete your account and all associated data.",
-        "Right to export your medical records in standard formats."
-      ]
-    },
-    {
-      icon: Globe,
-      title: "International Compliance",
-      content: [
-        "We comply with GDPR regulations for European users.",
-        "Indian users are protected under the Digital Personal Data Protection Act.",
-        "We follow HIPAA guidelines for medical data protection.",
-        "Regular compliance audits ensure ongoing protection standards."
-      ]
-    }
-  ];
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <DNABackground />
       <ThemeSwitcher />
       <Navigation />
-      
-      <div className="relative z-10 pt-24 px-4 pb-16">
-        <div className="max-w-6xl mx-auto">
+
+      <div className="relative z-10 pt-24 px-4 pb-8">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
+            className="mb-8"
           >
-            <div className="inline-flex items-center gap-3 glass px-6 py-3 rounded-full mb-8">
-              <Shield className="w-6 h-6 text-medical-blue" />
-              <span className="text-sm font-medium text-foreground">
-                Your Privacy Matters
-              </span>
+            <div className="text-center mb-8">
+              <Shield className="w-16 h-16 mx-auto mb-4 text-medical-blue" />
+              <h1 className="text-4xl font-bold text-foreground mb-4">
+                Privacy Policy
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Your privacy and data security are our top priorities
+              </p>
             </div>
-            
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Privacy Policy
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              We are committed to protecting your privacy and ensuring the security of your medical information. 
-              Here's how we handle your data with the highest standards of care.
-            </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <Card className="glass border-white/20 mb-8">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-medical-gradient rounded-xl flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-white" />
+          <div className="space-y-6">
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="w-6 h-6 text-medical-blue" />
+                  Data Protection & Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  MediBee is committed to protecting your personal health information. We use industry-standard encryption and security measures to safeguard your data.
+                </p>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-blue rounded-full mt-2 flex-shrink-0"></span>
+                    All medical data is encrypted both in transit and at rest
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-blue rounded-full mt-2 flex-shrink-0"></span>
+                    Firebase Firestore provides enterprise-grade security
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-blue rounded-full mt-2 flex-shrink-0"></span>
+                    Session data is automatically purged after 24 hours for guest users
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-6 h-6 text-medical-green" />
+                  Information We Collect
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-2">Session Information</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li>• IP address and location</li>
+                      <li>• Device and browser information</li>
+                      <li>• Session duration and activity</li>
+                    </ul>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground">Our Commitment</h2>
-                    <p className="text-muted-foreground">Last updated: January 2025</p>
+                    <h4 className="font-semibold text-foreground mb-2">Medical Data</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li>• Uploaded medical documents</li>
+                      <li>• AI analysis results</li>
+                      <li>• Search and interaction history</li>
+                    </ul>
                   </div>
                 </div>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  MediBee is built with privacy-first principles. We understand that medical information is highly sensitive, 
-                  and we've designed our platform to give you complete control over your data while providing the best 
-                  possible AI-powered health insights.
-                </p>
               </CardContent>
             </Card>
-          </motion.div>
 
-          <div className="grid gap-8">
-            {sections.map((section, index) => (
-              <motion.div
-                key={section.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="glass border-white/20 hover:shadow-glass transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-foreground">
-                      <div className="w-10 h-10 bg-medical-blue/20 rounded-lg flex items-center justify-center">
-                        <section.icon className="h-5 w-5 text-medical-blue" />
-                      </div>
-                      {section.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {section.content.map((item, itemIndex) => (
-                        <li key={itemIndex} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-medical-blue rounded-full mt-2 flex-shrink-0" />
-                          <span className="text-muted-foreground">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-16"
-          >
-            <Card className="glass border-white/20 bg-gradient-to-r from-medical-blue/5 to-medical-purple/5">
-              <CardContent className="p-8 text-center">
-                <h3 className="text-2xl font-bold text-foreground mb-4">
-                  Questions About Your Privacy?
-                </h3>
-                <p className="text-lg text-muted-foreground mb-6">
-                  We're here to help. Contact our privacy team if you have any questions about how we handle your data.
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-6 h-6 text-medical-purple" />
+                  How We Use Your Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Your information is used solely to provide and improve our medical assistance services:
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="mailto:privacy@medibee.ai"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-medical-gradient text-white rounded-xl font-semibold hover:shadow-neon-blue transition-all"
-                  >
-                    Contact Privacy Team
-                  </a>
-                  <a
-                    href="#data-request"
-                    className="inline-flex items-center gap-2 px-6 py-3 glass border border-white/20 text-foreground rounded-xl font-semibold hover:shadow-glass transition-all"
-                  >
-                    Request Your Data
-                  </a>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-purple rounded-full mt-2 flex-shrink-0"></span>
+                    Provide personalized AI-powered medical analysis
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-purple rounded-full mt-2 flex-shrink-0"></span>
+                    Improve our AI models through anonymized data patterns
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-purple rounded-full mt-2 flex-shrink-0"></span>
+                    Ensure platform security and prevent misuse
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-2 h-2 bg-medical-purple rounded-full mt-2 flex-shrink-0"></span>
+                    Provide technical support and troubleshooting
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCheck className="w-6 h-6 text-medical-amber" />
+                  Your Rights & Control
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  You have complete control over your data:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg glass border border-white/10">
+                    <h4 className="font-semibold text-foreground mb-2">Guest Users</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Data automatically deleted after 24 hours. No permanent storage without consent.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg glass border border-white/10">
+                    <h4 className="font-semibold text-foreground mb-2">Registered Users</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Full control to export, modify, or delete all personal data at any time.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-6 h-6 text-medical-red" />
+                  Data Sharing & Third Parties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                    ✅ We DO NOT share your medical data
+                  </h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    Your personal medical information is never sold, shared, or disclosed to third parties without your explicit consent.
+                  </p>
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  We only use trusted partners for essential services (Firebase for hosting, Gemini AI for analysis) 
+                  who comply with strict data protection standards and medical privacy regulations.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle>Contact & Questions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  If you have any questions about this privacy policy or your data, please contact us:
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    onClick={() => navigate('/')}
+                    className="bg-medical-gradient hover:opacity-90 text-white"
+                  >
+                    Return to Homepage
+                  </Button>
+                  <Button variant="outline" className="glass border-white/20">
+                    Contact Support
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8 pt-8 border-t border-white/20">
+            <p className="text-sm text-muted-foreground">
+              Last updated: June 1, 2025 | MediBee Privacy Policy v2.0
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSession } from './SessionProvider';
@@ -8,7 +9,7 @@ import { Home, LogIn } from 'lucide-react';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireSession?: boolean;
-  redirectToHome?: boolean; // Whether to redirect to home or show session prompt on current page
+  redirectToHome?: boolean;
 }
 
 const ProtectedRoute = ({ children, requireSession = false, redirectToHome = true }: ProtectedRouteProps) => {
@@ -17,18 +18,14 @@ const ProtectedRoute = ({ children, requireSession = false, redirectToHome = tru
   const location = useLocation();
 
   useEffect(() => {
-    // If session is required and we don't have one, handle redirect
     if (requireSession && !isLoading && !hasActiveSession) {
       if (redirectToHome) {
-        // Redirect to homepage and trigger session popup
         console.log('ProtectedRoute: Redirecting to homepage for session start');
         navigate('/', { replace: true });
-        // Small delay to ensure navigation completes before triggering popup
         setTimeout(() => {
           triggerSessionStart();
         }, 100);
       } else {
-        // Just trigger session popup on current page
         console.log('ProtectedRoute: Triggering session popup on current page');
         triggerSessionStart();
       }
@@ -43,7 +40,6 @@ const ProtectedRoute = ({ children, requireSession = false, redirectToHome = tru
     );
   }
 
-  // If session is required but not found and we're not redirecting to home, show session prompt
   if (requireSession && !hasActiveSession && !redirectToHome) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">

@@ -24,21 +24,17 @@ const SessionGuard = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Track page access attempts for security monitoring
     console.log(`SessionGuard: Access attempt to ${location.pathname}, session: ${hasActiveSession}`);
     
     if (!isLoading && requireSession && !hasActiveSession) {
-      // Log unauthorized access attempt
       console.warn(`Unauthorized access attempt to ${location.pathname}`);
       
-      // Redirect to home if not on allowed paths
       if (!allowedPaths.includes(location.pathname)) {
         navigate('/', { replace: true });
       }
     }
   }, [hasActiveSession, isLoading, location.pathname, requireSession, allowedPaths, navigate]);
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">
@@ -47,7 +43,6 @@ const SessionGuard = ({
     );
   }
 
-  // Show session required message for protected pages
   if (requireSession && !hasActiveSession && !allowedPaths.includes(location.pathname)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center p-4">
@@ -104,7 +99,6 @@ const SessionGuard = ({
     );
   }
 
-  // Render children if access is allowed
   return <>{children}</>;
 };
 

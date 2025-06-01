@@ -1,64 +1,25 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Microscope, TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Upload, Brain, FileText, Camera, Scan, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import Navigation from '@/components/Navigation';
 import SessionIndicator from '@/components/SessionIndicator';
+import { useSession } from '@/components/SessionProvider';
 
 const Analysis = () => {
-  const [selectedReport, setSelectedReport] = useState('blood_test');
+  const { trackActivity } = useSession();
+  const [activeTab, setActiveTab] = useState('prescription');
 
-  const analysisResults = {
-    blood_test: {
-      title: 'Blood Test Analysis',
-      date: '2024-01-15',
-      status: 'completed',
-      findings: [
-        { type: 'normal', text: 'Hemoglobin levels within normal range (14.2 g/dL)' },
-        { type: 'warning', text: 'Cholesterol slightly elevated (210 mg/dL)' },
-        { type: 'normal', text: 'Blood sugar levels normal (95 mg/dL)' },
-        { type: 'alert', text: 'Vitamin D deficiency detected (18 ng/mL)' }
-      ],
-      recommendations: [
-        'Consider reducing saturated fat intake',
-        'Increase vitamin D supplementation',
-        'Regular cardiovascular exercise recommended'
-      ]
-    },
-    xray: {
-      title: 'X-Ray Analysis',
-      date: '2024-01-10',
-      status: 'completed',
-      findings: [
-        { type: 'normal', text: 'No fractures or abnormalities detected' },
-        { type: 'normal', text: 'Bone density appears normal' },
-        { type: 'warning', text: 'Minor joint space narrowing observed' }
-      ],
-      recommendations: [
-        'Continue regular physical activity',
-        'Consider joint health supplements',
-        'Follow-up in 6 months if symptoms persist'
-      ]
-    }
+  const handleAnalysisStart = (type: string) => {
+    trackActivity('analysis_started', { type });
+    // TODO: Implement actual analysis logic
+    console.log(`Starting ${type} analysis`);
   };
-
-  const statusIcons = {
-    normal: CheckCircle,
-    warning: AlertTriangle,
-    alert: AlertTriangle
-  };
-
-  const statusColors = {
-    normal: 'text-medical-green',
-    warning: 'text-medical-amber',
-    alert: 'text-medical-red'
-  };
-
-  const currentAnalysis = analysisResults[selectedReport];
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -74,147 +35,128 @@ const Analysis = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Medical Analysis
+            <h1 className="text-4xl font-bold text-foreground mb-4">
+              AI Medical Analysis
             </h1>
             <p className="text-xl text-muted-foreground">
-              AI-powered insights from your medical reports
+              Upload medical documents for intelligent analysis and insights
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Report Selection */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-1"
-            >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 glass border-white/20">
+              <TabsTrigger value="prescription">Prescription Analysis</TabsTrigger>
+              <TabsTrigger value="reports">Medical Reports</TabsTrigger>
+              <TabsTrigger value="symptoms">Symptom Checker</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="prescription" className="space-y-6">
               <Card className="glass border-white/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <Microscope className="h-5 w-5 text-medical-blue" />
-                    Reports
+                  <CardTitle className="flex items-center gap-2">
+                    <Camera className="w-6 h-6 text-medical-blue" />
+                    Prescription & Medicine Analysis
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {Object.entries(analysisResults).map(([key, report]) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedReport(key)}
-                      className={`w-full p-3 rounded-lg text-left transition-all ${
-                        selectedReport === key
-                          ? 'bg-medical-blue/20 border border-medical-blue/30'
-                          : 'hover:bg-white/10'
-                      }`}
-                    >
-                      <p className="font-medium text-foreground">{report.title}</p>
-                      <p className="text-sm text-muted-foreground">{report.date}</p>
-                    </button>
-                  ))}
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center hover:border-medical-blue/50 transition-colors cursor-pointer">
+                      <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Upload Prescription</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Upload a photo of your prescription for AI analysis
+                      </p>
+                      <Button 
+                        onClick={() => handleAnalysisStart('prescription')}
+                        className="bg-medical-gradient hover:opacity-90 text-white"
+                      >
+                        Choose File
+                      </Button>
+                    </div>
+
+                    <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center hover:border-medical-green/50 transition-colors cursor-pointer">
+                      <Scan className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Medicine Box Scan</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Scan medicine packaging for detailed information
+                      </p>
+                      <Button 
+                        onClick={() => handleAnalysisStart('medicine_box')}
+                        variant="outline" 
+                        className="glass border-white/20"
+                      >
+                        Scan Now
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-1">
+                          Medical Disclaimer
+                        </h4>
+                        <p className="text-sm text-amber-700 dark:text-amber-300">
+                          AI analysis is for informational purposes only. Always consult with healthcare professionals for medical decisions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </TabsContent>
 
-            {/* Analysis Results */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-3"
-            >
-              <div className="space-y-6">
-                {/* Analysis Header */}
-                <Card className="glass border-white/20">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-foreground">{currentAnalysis.title}</CardTitle>
-                        <p className="text-muted-foreground">Analyzed on {currentAnalysis.date}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5 text-medical-green" />
-                        <span className="text-sm font-medium text-medical-green">Analysis Complete</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
+            <TabsContent value="reports" className="space-y-6">
+              <Card className="glass border-white/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-medical-green" />
+                    Medical Report Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-12 text-center">
+                    <Brain className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">Upload Medical Reports</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Upload blood tests, X-rays, or other medical documents for AI interpretation
+                    </p>
+                    <Button 
+                      onClick={() => handleAnalysisStart('medical_report')}
+                      className="bg-medical-gradient hover:opacity-90 text-white"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Report
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                {/* Findings */}
-                <Card className="glass border-white/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-foreground">
-                      <Brain className="h-5 w-5 text-medical-purple" />
-                      AI Findings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {currentAnalysis.findings.map((finding, index) => {
-                        const Icon = statusIcons[finding.type];
-                        return (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.4 + index * 0.1 }}
-                            className="flex items-start gap-3 p-3 rounded-lg glass"
-                          >
-                            <Icon className={`h-5 w-5 mt-0.5 ${statusColors[finding.type]} medical-glow`} />
-                            <p className="text-foreground">{finding.text}</p>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Recommendations */}
-                <Card className="glass border-white/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-foreground">
-                      <TrendingUp className="h-5 w-5 text-medical-green" />
-                      Recommendations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {currentAnalysis.recommendations.map((recommendation, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.6 + index * 0.1 }}
-                          className="flex items-start gap-3 p-3 rounded-lg glass"
-                        >
-                          <div className="w-2 h-2 bg-medical-blue rounded-full mt-2"></div>
-                          <p className="text-foreground">{recommendation}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Action Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="flex gap-4"
-                >
-                  <Button className="bg-medical-gradient hover:opacity-90 text-white">
-                    Download Report
-                  </Button>
-                  <Button variant="outline" className="glass border-white/20">
-                    Share with Doctor
-                  </Button>
-                  <Button variant="outline" className="glass border-white/20">
-                    Schedule Follow-up
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
+            <TabsContent value="symptoms" className="space-y-6">
+              <Card className="glass border-white/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="w-6 h-6 text-medical-purple" />
+                    AI Symptom Checker
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <Brain className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
+                    <p className="text-muted-foreground mb-6">
+                      AI-powered symptom checker will be available in the next update
+                    </p>
+                    <Button variant="outline" className="glass border-white/20" disabled>
+                      Check Symptoms
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

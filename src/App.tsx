@@ -6,9 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SessionProvider from "./components/SessionProvider";
-import ProtectedRoute from "./components/ProtectedRoute";
+import SessionGuard from "./components/SessionGuard";
 import LoadingSpinner from "./components/LoadingSpinner";
-import SessionPopup from "./components/SessionPopup";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -35,43 +34,50 @@ const App: React.FC = () => {
           <SessionProvider>
             <Suspense fallback={
               <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">
-                <LoadingSpinner size="lg" text="Loading..." />
+                <LoadingSpinner size="lg" text="Loading MediBee..." />
               </div>
             }>
               <Routes>
+                {/* Public routes - no session required */}
                 <Route path="/" element={
-                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                  <SessionGuard requireSession={false} allowedPaths={['/']}>
                     <Index />
-                  </ProtectedRoute>
+                  </SessionGuard>
                 } />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute requireSession={true}>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/analysis" element={
-                  <ProtectedRoute requireSession={true}>
-                    <Analysis />
-                  </ProtectedRoute>
-                } />
-                <Route path="/reports" element={
-                  <ProtectedRoute requireSession={true}>
-                    <Reports />
-                  </ProtectedRoute>
-                } />
+                
                 <Route path="/privacy" element={
-                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                  <SessionGuard requireSession={false} allowedPaths={['/privacy']}>
                     <PrivacyPolicy />
-                  </ProtectedRoute>
+                  </SessionGuard>
                 } />
+                
+                {/* Protected routes - session required */}
+                <Route path="/dashboard" element={
+                  <SessionGuard requireSession={true}>
+                    <Dashboard />
+                  </SessionGuard>
+                } />
+                
+                <Route path="/analysis" element={
+                  <SessionGuard requireSession={true}>
+                    <Analysis />
+                  </SessionGuard>
+                } />
+                
+                <Route path="/reports" element={
+                  <SessionGuard requireSession={true}>
+                    <Reports />
+                  </SessionGuard>
+                } />
+                
+                {/* 404 fallback */}
                 <Route path="*" element={
-                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                  <SessionGuard requireSession={false} allowedPaths={['*']}>
                     <NotFound />
-                  </ProtectedRoute>
+                  </SessionGuard>
                 } />
               </Routes>
             </Suspense>
-            <SessionPopup />
           </SessionProvider>
         </BrowserRouter>
         <Toaster />

@@ -90,13 +90,21 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     // Initialize session state
     const initializeSession = async () => {
       try {
+        // Log app initialization
+        console.log('MediBee: Initializing session system...');
+        
         const existingSessionId = localStorage.getItem('medibee_session_id');
 
         if (existingSessionId) {
+          console.log('MediBee: Found existing session, validating...');
           await loadSession(existingSessionId);
+        } else {
+          console.log('MediBee: No existing session found');
         }
       } catch (error) {
         console.error('Error initializing session:', error);
+        // Log error to Firebase for monitoring
+        await logSystemEvent('session_init_error', { error: error.message });
       } finally {
         setIsLoading(false);
       }
@@ -105,8 +113,8 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     initializeSession();
   }, []);
 
+  // Enhanced page tracking with security monitoring
   useEffect(() => {
-    // Track page visits and user activity
     if (session && hasActiveSession && !isLoading && location.pathname !== lastTrackedPage.current) {
       lastTrackedPage.current = location.pathname;
 
@@ -115,7 +123,6 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
         const currentPages = Array.isArray(prevSession.visitedPages) ? prevSession.visitedPages : [];
 
-        // Only update if the current page is not already in visitedPages
         if (!currentPages.includes(location.pathname)) {
           const updatedSession = {
             ...prevSession,
@@ -123,8 +130,16 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
             lastActivity: new Date().toISOString()
           };
 
-          // Update Firebase asynchronously
+          // Enhanced Firebase logging with security context
           updateSessionInFirebase(updatedSession).catch(console.error);
+          
+          // Log page access for security monitoring
+          logSecurityEvent('page_access', {
+            sessionId: prevSession.sessionId,
+            path: location.pathname,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+          });
 
           return updatedSession;
         }
@@ -134,17 +149,35 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [location.pathname, hasActiveSession, isLoading]);
 
-  // Auto-redirect logic for protected pages
-  useEffect(() => {
-    const protectedPaths = ['/dashboard', '/analysis', '/reports'];
-    const isProtectedPath = protectedPaths.includes(location.pathname);
-
-    // If user is on a protected path without a session, redirect to home
-    if (isProtectedPath && !isLoading && !hasActiveSession && location.pathname !== '/') {
-      console.log('SessionProvider: Redirecting from protected path to homepage');
-      navigate('/', { replace: true });
+  // System event logging for monitoring
+  const logSystemEvent = async (event: string, data: any) => {
+    try {
+      await setDoc(doc(db, 'system_logs', `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`), {
+        event,
+        data,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+      });
+    } catch (error) {
+      console.error('Failed to log system event:', error);
     }
-  }, [location.pathname, hasActiveSession, isLoading, navigate]);
+  };
+
+  // Security event logging
+  const logSecurityEvent = async (event: string, data: any) => {
+    try {
+      await setDoc(doc(db, 'security_logs', `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`), {
+        event,
+        data,
+        timestamp: new Date().toISOString(),
+        ip: 'client-side', // IP will be logged server-side in production
+        userAgent: navigator.userAgent
+      });
+    } catch (error) {
+      console.error('Failed to log security event:', error);
+    }
+  };
 
   const loadSession = async (sessionId: string) => {
     try {
@@ -152,18 +185,34 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       if (sessionDoc.exists()) {
         const sessionData = sessionDoc.data() as SessionData;
 
-        // Check if session is expired (7 hours = 25200000 milliseconds)
+        // Enhanced session validation with security checks
         const sessionStart = new Date(sessionData.startTime);
         const now = new Date();
         const sessionAge = now.getTime() - sessionStart.getTime();
-        const sevenHours = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+        const sevenHours = 7 * 60 * 60 * 1000;
 
-        if (sessionAge > sevenHours && !sessionData.userData?.isPermanentUser) {
-          // Session expired, remove it
+        // Check for session tampering
+        if (sessionData.sessionId !== sessionId) {
+          await logSecurityEvent('session_id_mismatch', { 
+            expectedId: sessionId, 
+            actualId: sessionData.sessionId 
+          });
           localStorage.removeItem('medibee_session_id');
           return;
         }
 
+        // Session expiry logic
+        if (sessionAge > sevenHours && !sessionData.userData?.isPermanentUser) {
+          await logSystemEvent('session_expired', { 
+            sessionId, 
+            age: sessionAge, 
+            isPermanent: sessionData.userData?.isPermanentUser 
+          });
+          localStorage.removeItem('medibee_session_id');
+          return;
+        }
+
+        // Ensure arrays exist
         if (!Array.isArray(sessionData.visitedPages)) {
           sessionData.visitedPages = [];
         }
@@ -171,25 +220,35 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
           sessionData.userActivities = [];
         }
 
-        // Update last activity to current time
+        // Update session activity
         sessionData.lastActivity = new Date().toISOString();
 
         setSession(sessionData);
         setHasActiveSession(true);
 
-        // Update Firebase with current activity
+        // Log successful session restoration
+        await logSystemEvent('session_restored', {
+          sessionId,
+          userType: sessionData.userData?.isPermanentUser ? 'permanent' : 'guest',
+          duration: sessionAge
+        });
+
         updateSessionInFirebase(sessionData).catch(console.error);
       } else {
         localStorage.removeItem('medibee_session_id');
+        await logSystemEvent('session_not_found', { sessionId });
       }
     } catch (error) {
       console.error('Error loading session:', error);
       localStorage.removeItem('medibee_session_id');
+      await logSystemEvent('session_load_error', { sessionId, error: error.message });
     }
   };
 
   const startSession = async (ipData: any, deviceData: any, userName?: string) => {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const isPermanentUser = userName?.includes('@') || false;
+    
     const sessionData: SessionData = {
       sessionId,
       ipAddress: ipData.ip,
@@ -201,31 +260,46 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
         timestamp: new Date().toISOString(),
         action: 'session_started',
         page: '/',
-        details: { userName: userName || 'Guest User' }
+        details: { 
+          userName: userName || 'Guest User',
+          userType: isPermanentUser ? 'permanent' : 'guest',
+          device: deviceData,
+          location: ipData
+        }
       }],
       userData: {
         medicalRecords: [],
         searchHistory: [],
         userName: userName || 'Guest User',
         preferences: {},
-        isPermanentUser: userName?.includes('@') || false // If email is provided, it's likely a Google user
+        isPermanentUser
       },
       isActive: true,
       lastActivity: new Date().toISOString()
     };
 
     try {
-      const sessionForFirebase = {
-        ...sessionData
-      };
-
-      await setDoc(doc(db, 'sessions', sessionId), sessionForFirebase);
+      // Enhanced session creation with security logging
+      await setDoc(doc(db, 'sessions', sessionId), sessionData);
       localStorage.setItem('medibee_session_id', sessionId);
+      
       setSession(sessionData);
       setHasActiveSession(true);
-      setShowSessionPopup(false); // Hide popup after successful session start
+      setShowSessionPopup(false);
+
+      // Log session creation
+      await logSystemEvent('session_created', {
+        sessionId,
+        userType: isPermanentUser ? 'permanent' : 'guest',
+        device: deviceData,
+        location: ipData
+      });
+
+      console.log('MediBee: Session created successfully:', sessionId);
     } catch (error) {
       console.error('Error starting session:', error);
+      await logSystemEvent('session_creation_error', { error: error.message });
+      throw error;
     }
   };
 
@@ -265,6 +339,16 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
         return updatedSession;
       });
+
+      // Enhanced activity logging for AI training data
+      if (action.includes('medical') || action.includes('search') || action.includes('upload')) {
+        await logSystemEvent('medical_activity', {
+          sessionId: session.sessionId,
+          action,
+          details,
+          timestamp: new Date().toISOString()
+        });
+      }
     }
   };
 

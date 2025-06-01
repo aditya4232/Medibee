@@ -1,6 +1,6 @@
 
 import { motion } from 'framer-motion';
-import { Upload, User, Sparkles } from 'lucide-react';
+import { Upload, User, Sparkles, Scan, Stethoscope, Pill } from 'lucide-react';
 import { useSession } from './SessionProvider';
 import { useNavigate } from 'react-router-dom';
 
@@ -83,8 +83,8 @@ const Hero = () => {
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-3 px-8 py-4 glass text-foreground rounded-2xl font-semibold text-lg hover:shadow-glass transition-all group backdrop-blur-xl"
               >
-                <Upload size={24} className="group-hover:scale-110 transition-transform" />
-                Upload Report
+                <Scan size={24} className="group-hover:scale-110 transition-transform" />
+                Analyze Prescription
               </motion.button>
             </motion.div>
 
@@ -115,7 +115,7 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Right Content - DNA Visualization */}
+          {/* Right Content - Enhanced Medical Animation */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -161,7 +161,7 @@ const Hero = () => {
                     </motion.div>
                   ))}
 
-                  {/* Central Core */}
+                  {/* Central Medical Icon */}
                   <motion.div
                     animate={{
                       scale: [1, 1.2, 1],
@@ -175,7 +175,7 @@ const Hero = () => {
                     className="absolute inset-0 flex items-center justify-center"
                   >
                     <div className="w-16 h-16 bg-medical-gradient rounded-full flex items-center justify-center shadow-neon-blue">
-                      <span className="text-2xl">🧬</span>
+                      <Stethoscope className="w-8 h-8 text-white" />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -187,7 +187,7 @@ const Hero = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute top-8 right-8 w-12 h-12 bg-medical-blue/20 rounded-full flex items-center justify-center glass backdrop-blur-xl"
               >
-                <span className="text-xl">💊</span>
+                <Pill className="w-6 h-6 text-medical-blue" />
               </motion.div>
 
               <motion.div
@@ -195,7 +195,7 @@ const Hero = () => {
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 className="absolute bottom-8 left-8 w-12 h-12 bg-medical-green/20 rounded-full flex items-center justify-center glass backdrop-blur-xl"
               >
-                <span className="text-xl">🩺</span>
+                <Scan className="w-6 h-6 text-medical-green" />
               </motion.div>
 
               <motion.div
@@ -204,6 +204,18 @@ const Hero = () => {
                 className="absolute top-1/2 left-8 w-10 h-10 bg-medical-purple/20 rounded-full flex items-center justify-center glass backdrop-blur-xl"
               >
                 <span className="text-lg">🔬</span>
+              </motion.div>
+
+              {/* Prescription Scanning Animation */}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                className="absolute top-1/2 right-8 w-10 h-10 bg-medical-amber/20 rounded-lg flex items-center justify-center glass backdrop-blur-xl"
+              >
+                <span className="text-lg">📋</span>
               </motion.div>
             </div>
           </motion.div>

@@ -128,9 +128,9 @@ const Index = () => {
                 color: "text-medical-blue"
               },
               {
-                icon: Microscope,
-                title: "Image Recognition",
-                description: "Upload medicine photos and get instant information about usage, dosage, and effects",
+                icon: Scan,
+                title: "Prescription OCR",
+                description: "Upload prescription photos and get instant information about medicines, dosage, and usage",
                 color: "text-medical-green"
               },
               {

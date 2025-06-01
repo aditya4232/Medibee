@@ -27,7 +27,7 @@ const ThemeSwitcher = () => {
       onClick={toggleTheme}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="fixed top-6 right-6 z-50 w-12 h-12 glass rounded-xl flex items-center justify-center group"
+      className="fixed top-20 right-6 z-40 w-10 h-10 glass rounded-lg flex items-center justify-center group"
     >
       <motion.div
         initial={false}
@@ -35,9 +35,9 @@ const ThemeSwitcher = () => {
         transition={{ duration: 0.3 }}
       >
         {isDark ? (
-          <Sun size={20} className="text-neon-cyan group-hover:text-yellow-400 transition-colors" />
+          <Sun size={18} className="text-neon-cyan group-hover:text-yellow-400 transition-colors" />
         ) : (
-          <Moon size={20} className="text-medical-blue group-hover:text-purple-600 transition-colors" />
+          <Moon size={18} className="text-medical-blue group-hover:text-purple-600 transition-colors" />
         )}
       </motion.div>
     </motion.button>

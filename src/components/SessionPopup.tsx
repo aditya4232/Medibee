@@ -165,10 +165,10 @@ const SessionPopup = () => {
           />
 
           <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm px-4"
           >
           <Card className="glass border-white/20 shadow-2xl backdrop-blur-md">
             <CardHeader className="pb-4 text-center">

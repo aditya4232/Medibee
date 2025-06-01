@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import Navigation from '@/components/Navigation';
+import SessionIndicator from '@/components/SessionIndicator';
 
 const Analysis = () => {
   const [selectedReport, setSelectedReport] = useState('blood_test');
@@ -64,7 +65,8 @@ const Analysis = () => {
       <DNABackground />
       <ThemeSwitcher />
       <Navigation />
-      
+      <SessionIndicator />
+
       <div className="relative z-10 pt-24 px-4 pb-8">
         <div className="max-w-7xl mx-auto">
           <motion.div

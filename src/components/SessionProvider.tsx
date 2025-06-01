@@ -23,6 +23,7 @@ interface SessionData {
     searchHistory: string[];
     userName?: string;
     preferences?: any;
+    isPermanentUser?: boolean;
   };
   isActive: boolean;
   lastActivity: string;
@@ -31,6 +32,8 @@ interface SessionData {
 interface SessionContextType {
   session: SessionData | null;
   hasActiveSession: boolean;
+  showSessionPopup: boolean;
+  triggerSessionStart: () => void;
   startSession: (ipData: any, deviceData: any, userName?: string) => Promise<void>;
   updateUserData: (data: any) => Promise<void>;
   addMedicalRecord: (record: any) => Promise<void>;
@@ -44,13 +47,16 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | null>(null);
 
-export const useSession = () => {
+// Export useSession hook separately to fix HMR issues
+export function useSession() {
   const context = useContext(SessionContext);
   if (!context) {
     // Return a default state instead of throwing an error
     return {
       session: null,
       hasActiveSession: false,
+      showSessionPopup: false,
+      triggerSessionStart: () => {},
       startSession: async () => {},
       updateUserData: async () => {},
       addMedicalRecord: async () => {},
@@ -63,21 +69,29 @@ export const useSession = () => {
     };
   }
   return context;
-};
+}
 
 const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<SessionData | null>(null);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSessionPopup, setShowSessionPopup] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const lastTrackedPage = useRef<string>('');
+
+  const triggerSessionStart = () => {
+    if (!hasActiveSession) {
+      setShowSessionPopup(true);
+    }
+  };
 
   useEffect(() => {
     // Initialize session state
     const initializeSession = async () => {
       try {
         const existingSessionId = localStorage.getItem('medibee_session_id');
+
         if (existingSessionId) {
           await loadSession(existingSessionId);
         }
@@ -120,6 +134,18 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [location.pathname, hasActiveSession, isLoading]);
 
+  // Auto-redirect logic for protected pages
+  useEffect(() => {
+    const protectedPaths = ['/dashboard', '/analysis', '/reports'];
+    const isProtectedPath = protectedPaths.includes(location.pathname);
+
+    // If user is on a protected path without a session, redirect to home
+    if (isProtectedPath && !isLoading && !hasActiveSession && location.pathname !== '/') {
+      console.log('SessionProvider: Redirecting from protected path to homepage');
+      navigate('/', { replace: true });
+    }
+  }, [location.pathname, hasActiveSession, isLoading, navigate]);
+
   const loadSession = async (sessionId: string) => {
     try {
       const sessionDoc = await getDoc(doc(db, 'sessions', sessionId));
@@ -132,10 +158,9 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
         const sessionAge = now.getTime() - sessionStart.getTime();
         const sevenHours = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
 
-        if (sessionAge > sevenHours && !sessionData.userData.isPermanentUser) {
+        if (sessionAge > sevenHours && !sessionData.userData?.isPermanentUser) {
           // Session expired, remove it
           localStorage.removeItem('medibee_session_id');
-          console.log('Session expired after 7 hours');
           return;
         }
 
@@ -183,7 +208,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
         searchHistory: [],
         userName: userName || 'Guest User',
         preferences: {},
-        isPermanentUser: false
+        isPermanentUser: userName?.includes('@') || false // If email is provided, it's likely a Google user
       },
       isActive: true,
       lastActivity: new Date().toISOString()
@@ -198,6 +223,7 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('medibee_session_id', sessionId);
       setSession(sessionData);
       setHasActiveSession(true);
+      setShowSessionPopup(false); // Hide popup after successful session start
     } catch (error) {
       console.error('Error starting session:', error);
     }
@@ -348,6 +374,8 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
     <SessionContext.Provider value={{
       session,
       hasActiveSession,
+      showSessionPopup,
+      triggerSessionStart,
       startSession,
       updateUserData,
       addMedicalRecord,

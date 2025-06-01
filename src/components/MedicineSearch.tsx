@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { aiEngine, type AIResponse, type MedicineKnowledge } from '@/lib/aiEngine';
+import { useSession } from './SessionProvider';
 
 interface MedicineInfo {
   name: string;
@@ -33,23 +35,35 @@ interface MedicineInfo {
 const MedicineSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [medicineInfo, setMedicineInfo] = useState<MedicineInfo | null>(null);
+  const [searchResults, setSearchResults] = useState<MedicineKnowledge[]>([]);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { addSearchQuery, triggerSessionStart, hasActiveSession } = useSession();
 
-  // This would be replaced with actual API calls to Indian medicine databases
-  const searchMedicine = async (query: string): Promise<MedicineInfo | null> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+  // Real AI-powered medicine search
+  const searchMedicine = async (query: string): Promise<void> => {
+    try {
+      const response = await aiEngine.searchMedicine(query);
+      setAiResponse(response);
 
-    // For demo purposes, return null to show "no data" state
-    // In production, this would call:
-    // 1. Indian Drug Database APIs
-    // 2. Pharmacy APIs (1mg, PharmEasy, etc.)
-    // 3. Government drug databases
-    // 4. Google Maps API for nearby pharmacies
+      if (response.success && response.data) {
+        setSearchResults(Array.isArray(response.data) ? response.data : [response.data]);
+        setError(null);
 
-    return null;
+        // Track search in session
+        if (hasActiveSession) {
+          await addSearchQuery(query);
+        }
+      } else {
+        setSearchResults([]);
+        setError(response.error || 'No medicine information found');
+      }
+    } catch (err) {
+      setSearchResults([]);
+      setError('Search failed. Please try again.');
+      console.error('Medicine search error:', err);
+    }
   };
 
   const handleSearch = async () => {
@@ -62,22 +76,19 @@ const MedicineSearch = () => {
       return;
     }
 
+    // Trigger session start if no active session
+    if (!hasActiveSession) {
+      triggerSessionStart();
+      return;
+    }
+
     setIsSearching(true);
     setError(null);
-    setMedicineInfo(null);
+    setSearchResults([]);
+    setAiResponse(null);
 
-    try {
-      const result = await searchMedicine(searchQuery);
-      if (result) {
-        setMedicineInfo(result);
-      } else {
-        setError('No data available for this medicine. Please try a different search term.');
-      }
-    } catch (err) {
-      setError('Failed to search medicine. Please try again.');
-    } finally {
-      setIsSearching(false);
-    }
+    await searchMedicine(searchQuery);
+    setIsSearching(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -146,6 +157,113 @@ const MedicineSearch = () => {
         </Card>
       )}
 
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <div className="space-y-4">
+          {/* AI Response Info */}
+          {aiResponse && (
+            <Card className="glass border-white/20 border-green-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                      AI-Powered Results
+                    </span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {Math.round(aiResponse.confidence * 100)}% Confidence
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Sources: {aiResponse.sources.join(', ')}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Medicine Results */}
+          {searchResults.map((medicine, index) => (
+            <Card key={index} className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{medicine.name}</span>
+                  <Badge
+                    variant={medicine.availability === 'Available' ? 'default' : 'destructive'}
+                    className={medicine.availability === 'Available' ? 'bg-green-500/20 text-green-700' : ''}
+                  >
+                    {medicine.availability}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Basic Information</h4>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Generic Name:</strong> {medicine.genericName}</p>
+                      <p><strong>Category:</strong> {medicine.category}</p>
+                      <p><strong>Dosage:</strong> {medicine.dosage}</p>
+                      <p><strong>Price Range:</strong> ₹{medicine.price.min} - ₹{medicine.price.max}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Uses</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {medicine.uses.map((use, useIndex) => (
+                        <Badge key={useIndex} variant="secondary" className="text-xs">
+                          {use}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {medicine.sideEffects.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Side Effects</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {medicine.sideEffects.map((effect, effectIndex) => (
+                        <Badge key={effectIndex} variant="outline" className="text-xs text-amber-600">
+                          {effect}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {medicine.contraindications.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Contraindications</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {medicine.contraindications.map((contra, contraIndex) => (
+                        <Badge key={contraIndex} variant="destructive" className="text-xs">
+                          {contra}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* AI Disclaimer */}
+          {aiResponse && (
+            <Card className="glass border-white/20 border-amber-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-amber-700 dark:text-amber-300">
+                    <strong>AI Disclaimer:</strong> {aiResponse.disclaimer}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       {/* No Data State */}
       {error && (
         <Card className="glass border-white/20">
@@ -156,7 +274,7 @@ const MedicineSearch = () => {
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Try searching for:</p>
               <div className="flex flex-wrap gap-2 justify-center">
-                {['Paracetamol', 'Crocin', 'Dolo 650', 'Azithromycin', 'Amoxicillin'].map((suggestion) => (
+                {['Paracetamol', 'Ibuprofen', 'Crocin', 'Dolo 650', 'Aspirin'].map((suggestion) => (
                   <Button
                     key={suggestion}
                     variant="outline"
@@ -175,8 +293,6 @@ const MedicineSearch = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Note: Medicine Information section removed - only real API data will be shown */}
     </div>
   );
 };

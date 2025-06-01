@@ -1,8 +1,29 @@
 
 import { motion } from 'framer-motion';
 import { Upload, User, Sparkles } from 'lucide-react';
+import { useSession } from './SessionProvider';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const { triggerSessionStart, hasActiveSession } = useSession();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (hasActiveSession) {
+      navigate('/dashboard');
+    } else {
+      triggerSessionStart();
+    }
+  };
+
+  const handleUploadReport = () => {
+    if (hasActiveSession) {
+      navigate('/dashboard?tab=reports');
+    } else {
+      triggerSessionStart();
+    }
+  };
+
   return (
     <section className="relative z-10 pt-20 pb-32 px-4">
       <div className="max-w-7xl mx-auto">
@@ -21,16 +42,16 @@ const Hero = () => {
                   Powered by Gemini AI
                 </span>
               </div>
-              
+
               <h1 className="text-5xl md:text-7xl lg:text-6xl xl:text-7xl font-bold text-foreground mb-6 leading-tight">
                 Your Tiny
                 <span className="bg-medical-gradient bg-clip-text text-transparent block">
                   Medical Assistant
                 </span>
               </h1>
-              
+
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-                Simplify medicine usage & medical jargon with AI-powered insights. 
+                Simplify medicine usage & medical jargon with AI-powered insights.
                 Get personalized health guidance in simple, understandable language.
               </p>
             </motion.div>
@@ -42,20 +63,22 @@ const Hero = () => {
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
             >
               <motion.button
+                onClick={handleGetStarted}
                 whileHover={{ scale: 1.05, boxShadow: "0 10px 40px rgba(59, 130, 246, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-3 px-8 py-4 bg-medical-gradient text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-neon-blue transition-all group"
               >
                 <User size={24} className="group-hover:scale-110 transition-transform" />
-                Get Started
+                {hasActiveSession ? 'Go to Dashboard' : 'Get Started'}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   className="w-2 h-2 bg-white rounded-full opacity-60"
                 />
               </motion.button>
-              
+
               <motion.button
+                onClick={handleUploadReport}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-3 px-8 py-4 glass text-foreground rounded-2xl font-semibold text-lg hover:shadow-glass transition-all group backdrop-blur-xl"
@@ -74,7 +97,7 @@ const Hero = () => {
             >
               {[
                 "🩺 Medical OCR",
-                "🧬 AI Analysis", 
+                "🧬 AI Analysis",
                 "🗣️ Hinglish Support",
                 "🔒 Privacy First",
                 "📱 PWA Ready"
@@ -123,7 +146,7 @@ const Hero = () => {
                         delay: i * 0.5
                       }}
                     >
-                      <div 
+                      <div
                         className={`w-4 h-4 rounded-full absolute bg-gradient-to-r ${
                           i % 4 === 0 ? 'from-medical-blue to-medical-purple' :
                           i % 4 === 1 ? 'from-medical-green to-medical-blue' :
@@ -137,15 +160,15 @@ const Hero = () => {
                       />
                     </motion.div>
                   ))}
-                  
+
                   {/* Central Core */}
                   <motion.div
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.2, 1],
                       opacity: [0.6, 1, 0.6]
                     }}
-                    transition={{ 
-                      duration: 3, 
+                    transition={{
+                      duration: 3,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
@@ -166,7 +189,7 @@ const Hero = () => {
               >
                 <span className="text-xl">💊</span>
               </motion.div>
-              
+
               <motion.div
                 animate={{ y: [10, -10, 10] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import Navigation from '@/components/Navigation';
+import SessionIndicator from '@/components/SessionIndicator';
 import { useSession } from '@/components/SessionProvider';
 
 const Reports = () => {
@@ -17,7 +18,7 @@ const Reports = () => {
 
   useEffect(() => {
     if (session?.userData?.medicalRecords) {
-      const filtered = session.userData.medicalRecords.filter(record => 
+      const filtered = session.userData.medicalRecords.filter(record =>
         record.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.type?.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -42,44 +43,13 @@ const Reports = () => {
     }
   };
 
-  if (!hasActiveSession) {
-    return (
-      <div className="min-h-screen relative overflow-hidden">
-        <DNABackground />
-        <ThemeSwitcher />
-        <Navigation />
-        
-        <div className="relative z-10 pt-24 px-4 pb-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass p-12 rounded-3xl"
-            >
-              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-foreground mb-4">Start a Session to View Reports</h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                Begin your medical journey to upload and analyze your health documents
-              </p>
-              <Button 
-                onClick={() => window.location.href = '/'}
-                className="bg-medical-gradient text-white px-8 py-3"
-              >
-                Start Session
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       <DNABackground />
       <ThemeSwitcher />
       <Navigation />
-      
+      <SessionIndicator />
+
       <div className="relative z-10 pt-24 px-4 pb-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -185,7 +155,7 @@ const Reports = () => {
                   <p className="text-muted-foreground mb-6">
                     Start by uploading your first medical document
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => window.location.href = '/'}
                     className="bg-medical-gradient text-white"
                   >

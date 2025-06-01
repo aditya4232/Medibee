@@ -1,21 +1,24 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Activity, Heart, Brain, Calendar, TrendingUp, FileText, Search, Plus, AlertCircle } from 'lucide-react';
+import { Upload, Activity, Heart, Brain, Calendar, TrendingUp, FileText, Search, Plus, AlertCircle, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DNABackground from '@/components/DNABackground';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import Navigation from '@/components/Navigation';
+import SessionIndicator from '@/components/SessionIndicator';
 import MedicineSearch from '@/components/MedicineSearch';
 import AIReportAnalysis from '@/components/AIReportAnalysis';
 import UserProfile from '@/components/UserProfile';
 import { useSession } from '@/components/SessionProvider';
 
 const Dashboard = () => {
-  const { session } = useSession();
+  const { session, hasActiveSession, isLoading } = useSession();
   const [activeTab, setActiveTab] = useState('overview');
+
+
 
   // Get real data from session or show null state
   const medicalRecords = session?.userData?.medicalRecords || [];
@@ -40,6 +43,7 @@ const Dashboard = () => {
       <DNABackground />
       <ThemeSwitcher />
       <Navigation />
+      <SessionIndicator />
 
       <div className="relative z-10 pt-24 px-4 pb-8">
         <div className="max-w-7xl mx-auto">

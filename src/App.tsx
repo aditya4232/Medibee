@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SessionProvider from "./components/SessionProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingSpinner from "./components/LoadingSpinner";
+import SessionPopup from "./components/SessionPopup";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -38,26 +39,39 @@ const App: React.FC = () => {
               </div>
             }>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={
+                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                    <Index />
+                  </ProtectedRoute>
+                } />
                 <Route path="/dashboard" element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireSession={true}>
                     <Dashboard />
                   </ProtectedRoute>
                 } />
                 <Route path="/analysis" element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireSession={true}>
                     <Analysis />
                   </ProtectedRoute>
                 } />
                 <Route path="/reports" element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireSession={true}>
                     <Reports />
                   </ProtectedRoute>
                 } />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/privacy" element={
+                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                    <PrivacyPolicy />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={
+                  <ProtectedRoute requireSession={false} redirectToHome={false}>
+                    <NotFound />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </Suspense>
+            <SessionPopup />
           </SessionProvider>
         </BrowserRouter>
         <Toaster />

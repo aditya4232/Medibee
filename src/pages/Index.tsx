@@ -20,9 +20,15 @@ import MedicalDisclaimer from '@/components/MedicalDisclaimer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { useSession } from '@/components/SessionProvider';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import SessionIndicator from '@/components/SessionIndicator';
 
 const Index = () => {
-  const { hasActiveSession, isLoading } = useSession();
+  const { hasActiveSession, isLoading, session, triggerSessionStart } = useSession();
+  const navigate = useNavigate();
+
+
 
   if (isLoading) {
     return (
@@ -38,10 +44,13 @@ const Index = () => {
       <ThemeSwitcher />
       <Navigation />
       <SessionPopup />
+      <SessionIndicator />
       <Hero />
 
       {/* Show session actions only when user has active session */}
       {hasActiveSession && <SessionActions />}
+
+
 
       {/* Only show About Project when no active session */}
       {!hasActiveSession && (
@@ -145,9 +154,20 @@ const Index = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={triggerSessionStart}
                 className="px-8 py-4 bg-medical-gradient text-white rounded-xl font-semibold shadow-neon-blue hover:shadow-lg transition-all"
               >
                 Start Your Health Journey
+              </motion.button>
+            )}
+            {hasActiveSession && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/dashboard')}
+                className="px-8 py-4 bg-medical-gradient text-white rounded-xl font-semibold shadow-neon-blue hover:shadow-lg transition-all"
+              >
+                Go to Dashboard
               </motion.button>
             )}
           </motion.div>

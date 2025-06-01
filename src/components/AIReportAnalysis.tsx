@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from './SessionProvider';
+import { aiEngine, type AIResponse } from '@/lib/aiEngine';
+import { documentProcessor, type ProcessedDocument } from '@/lib/documentProcessor';
 
 interface AnalysisResult {
   reportType: string;
@@ -20,25 +22,57 @@ interface AnalysisResult {
 const AIReportAnalysis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [processedDocument, setProcessedDocument] = useState<ProcessedDocument | null>(null);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { addMedicalRecord } = useSession();
+  const { addMedicalRecord, triggerSessionStart, hasActiveSession } = useSession();
 
-  // This would be replaced with actual AI analysis
-  const analyzeReport = async (file: File): Promise<AnalysisResult | null> => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  // Enhanced AI-powered report analysis with document processing
+  const analyzeReport = async (file: File): Promise<void> => {
+    try {
+      // Step 1: Process document with enhanced OCR and entity extraction
+      console.log('Processing document...');
+      const processed = await documentProcessor.processDocument(file);
+      setProcessedDocument(processed);
 
-    // In production, this would:
-    // 1. Extract text from PDF/image using OCR
-    // 2. Send to AI model (Gemini/OpenAI) for analysis
-    // 3. Parse medical values and compare with normal ranges
-    // 4. Generate insights and recommendations
+      // Step 2: Use AI engine for enhanced analysis
+      console.log('Analyzing with AI...');
+      const response = await aiEngine.analyzeReport(processed.extractedText, processed.structuredData.reportType);
+      setAiResponse(response);
 
-    // For now, return null to show "no data" state
-    return null;
+      if (response.success) {
+        setError(null);
+
+        // Save comprehensive analysis to medical records
+        if (hasActiveSession) {
+          await addMedicalRecord({
+            type: 'enhanced_ai_analysis',
+            fileName: file.name,
+            reportType: processed.structuredData.reportType,
+            processedDocument: processed,
+            aiResponse: response,
+            uploadDate: new Date().toISOString(),
+            confidence: processed.confidence,
+            extractedEntities: processed.entities.length,
+            structuredData: processed.structuredData
+          });
+        }
+
+        toast({
+          title: "Enhanced Analysis Complete",
+          description: `Document processed with ${Math.round(processed.confidence * 100)}% confidence. AI analysis complete.`,
+        });
+      } else {
+        setError(response.error || 'AI analysis failed');
+      }
+    } catch (err) {
+      setError('Failed to analyze report. Please try again.');
+      console.error('Enhanced report analysis error:', err);
+    }
   };
+
+
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,42 +100,27 @@ const AIReportAnalysis = () => {
 
       setSelectedFile(file);
       setError(null);
-      setAnalysisResult(null);
+      setAiResponse(null);
+      setProcessedDocument(null);
     }
   }, [toast]);
 
   const handleAnalyze = async () => {
     if (!selectedFile) return;
 
+    // Trigger session start if no active session
+    if (!hasActiveSession) {
+      triggerSessionStart();
+      return;
+    }
+
     setIsAnalyzing(true);
     setError(null);
+    setAiResponse(null);
+    setProcessedDocument(null);
 
-    try {
-      const result = await analyzeReport(selectedFile);
-
-      if (result) {
-        setAnalysisResult(result);
-
-        // Save to session
-        await addMedicalRecord({
-          type: 'report_analysis',
-          fileName: selectedFile.name,
-          analysisResult: result,
-          uploadDate: new Date().toISOString()
-        });
-
-        toast({
-          title: "Analysis Complete",
-          description: "Your medical report has been analyzed successfully.",
-        });
-      } else {
-        setError('Unable to analyze this report. The AI system is currently being enhanced to provide real-time analysis.');
-      }
-    } catch (err) {
-      setError('Failed to analyze report. Please try again.');
-    } finally {
-      setIsAnalyzing(false);
-    }
+    await analyzeReport(selectedFile);
+    setIsAnalyzing(false);
   };
 
   const getRiskColor = (risk: string) => {
@@ -232,7 +251,154 @@ const AIReportAnalysis = () => {
         </Card>
       )}
 
-      {/* Note: Analysis Results section removed - only real AI analysis will be shown */}
+      {/* Document Processing Results */}
+      {processedDocument && (
+        <div className="space-y-4">
+          {/* Document Processing Info */}
+          <Card className="glass border-white/20 border-blue-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    Document Processed
+                  </span>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  {Math.round(processedDocument.confidence * 100)}% Confidence
+                </Badge>
+              </div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>Processing Time: {processedDocument.metadata.processingTime}ms</p>
+                <p>Entities Extracted: {processedDocument.entities.length}</p>
+                <p>Report Type: {processedDocument.structuredData.reportType}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Structured Data */}
+          {processedDocument.structuredData.labResults.length > 0 && (
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  Lab Results Extracted
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {processedDocument.structuredData.labResults.map((result, index) => (
+                    <div key={index} className="p-3 rounded-lg glass border border-white/10">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium text-foreground">{result.testName}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {result.value} {result.unit}
+                            {result.referenceRange && ` (Normal: ${result.referenceRange})`}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={result.status === 'normal' ? 'default' : 'destructive'}
+                          className={result.status === 'normal' ? 'bg-green-500/20 text-green-700' : ''}
+                        >
+                          {result.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Medications Extracted */}
+          {processedDocument.structuredData.medications.length > 0 && (
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-purple-500" />
+                  Medications Extracted
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {processedDocument.structuredData.medications.map((med, index) => (
+                    <div key={index} className="p-2 rounded-lg glass border border-white/10">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium text-foreground">{med.name}</span>
+                          {med.dosage && <span className="text-sm text-muted-foreground ml-2">{med.dosage}</span>}
+                          {med.frequency && <span className="text-sm text-muted-foreground ml-2">({med.frequency})</span>}
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {Math.round(med.confidence * 100)}%
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* AI Analysis Results */}
+      {aiResponse && aiResponse.success && (
+        <div className="space-y-4">
+          {/* AI Response Info */}
+          <Card className="glass border-white/20 border-green-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    Enhanced AI Analysis Complete
+                  </span>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  {Math.round(aiResponse.confidence * 100)}% Confidence
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Sources: {aiResponse.sources.join(', ')}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Analysis Results */}
+          <Card className="glass border-white/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                AI Analysis Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg glass">
+                  <h4 className="font-medium text-foreground mb-2">Enhanced AI Analysis</h4>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {typeof aiResponse.data === 'string' ? aiResponse.data : JSON.stringify(aiResponse.data, null, 2)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Disclaimer */}
+          <Card className="glass border-white/20 border-amber-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-700 dark:text-amber-300">
+                  <strong>Enhanced AI Analysis Disclaimer:</strong> {aiResponse.disclaimer}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

@@ -33,7 +33,6 @@ const SessionPopup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Initialize device and IP data on component mount
   useEffect(() => {
     const getDeviceInfo = () => {
       const userAgent = navigator.userAgent;
@@ -63,8 +62,6 @@ const SessionPopup = () => {
 
     const getIPData = async () => {
       try {
-        // Use a CORS-friendly IP service or fallback to default data
-        // For development, we'll use default data to avoid CORS issues
         setIPData({
           ip: '127.0.0.1',
           location: 'Local Development',
@@ -86,8 +83,6 @@ const SessionPopup = () => {
     getIPData();
   }, []);
 
-
-
   const handleStartSession = async () => {
     if (!deviceInfo || !ipData) {
       toast({
@@ -105,7 +100,6 @@ const SessionPopup = () => {
         title: "Session Started!",
         description: "Welcome to MediBee. Redirecting to dashboard...",
       });
-      // Redirect to dashboard after successful session start
       setTimeout(() => {
         navigate('/dashboard');
       }, 1000);
@@ -129,13 +123,6 @@ const SessionPopup = () => {
       if (userData) {
         console.log('Google login successful:', userData);
 
-        // Create a permanent session with Google user data
-        const sessionData = {
-          ...userData,
-          isPermanentUser: true,
-          googleUser: true
-        };
-
         await startSession(
           ipData || { ip: '127.0.0.1', location: 'Local', country: 'India', city: 'Mumbai' },
           deviceInfo || { type: 'Desktop', browser: 'Chrome', os: 'Windows' },
@@ -147,7 +134,6 @@ const SessionPopup = () => {
           description: `Welcome ${userData.displayName || userData.email}! Your data will be saved permanently.`,
         });
 
-        // Redirect to dashboard after successful Google login
         setTimeout(() => {
           navigate('/dashboard');
         }, 1000);
@@ -164,23 +150,20 @@ const SessionPopup = () => {
     }
   };
 
-  // Don't show if session is loading or if there's already an active session
   if (sessionLoading || hasActiveSession) return null;
 
   return (
     <AnimatePresence>
       {showSessionPopup && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            onClick={() => {}} // Backdrop click disabled for now
+            onClick={() => {}}
           />
 
-          {/* Popup */}
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,7 +183,6 @@ const SessionPopup = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Features */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2 p-3 rounded-lg glass">
                   <Shield className="h-4 w-4 text-medical-green" />
@@ -216,7 +198,6 @@ const SessionPopup = () => {
                 </div>
               </div>
 
-              {/* Google Login - Primary Option */}
               <div className="space-y-3">
                 <Button
                   onClick={handleGoogleLogin}
@@ -231,7 +212,6 @@ const SessionPopup = () => {
                 </p>
               </div>
 
-              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-white/20" />
@@ -241,7 +221,6 @@ const SessionPopup = () => {
                 </div>
               </div>
 
-              {/* Guest Session */}
               <div className="space-y-3">
                 <Input
                   placeholder="Enter your name (optional)"

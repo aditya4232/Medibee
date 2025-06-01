@@ -1,34 +1,23 @@
 
 import { motion } from 'framer-motion';
-import { Upload, Brain, Microscope, MessageCircle, Heart, Activity, Search, Scan } from 'lucide-react';
+import { Upload, Brain, Microscope, MessageCircle, Heart, Activity, Search, Scan, Shield, Users, Clock, Star } from 'lucide-react';
 import Hero from '@/components/Hero';
-import HealthMetrics from '@/components/HealthMetrics';
 import MediBeeChat from '@/components/MediBeeChat';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import DNABackground from '@/components/DNABackground';
 import Navigation from '@/components/Navigation';
-import AboutSection from '@/components/AboutSection';
-import MedicalHurdlesIndia from '@/components/MedicalHurdlesIndia';
-import WorkingSection from '@/components/WorkingSection';
-import AimSection from '@/components/AimSection';
-import AboutProject from '@/components/AboutProject';
-import AboutDeveloper from '@/components/AboutDeveloper';
 import SessionActions from '@/components/SessionActions';
 import SessionPopup from '@/components/SessionPopup';
-
-import MedicalDisclaimer from '@/components/MedicalDisclaimer';
 import LoadingSpinner from '@/components/LoadingSpinner';
-
+import SessionIndicator from '@/components/SessionIndicator';
 import { useSession } from '@/components/SessionProvider';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import SessionIndicator from '@/components/SessionIndicator';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
-  const { hasActiveSession, isLoading, session, triggerSessionStart } = useSession();
+  const { hasActiveSession, isLoading, triggerSessionStart } = useSession();
   const navigate = useNavigate();
-
-
 
   if (isLoading) {
     return (
@@ -47,19 +36,73 @@ const Index = () => {
       <SessionIndicator />
       <Hero />
 
-      {/* Show session actions only when user has active session */}
       {hasActiveSession && <SessionActions />}
 
+      {/* Quick Access Cards - Show only when user has session */}
+      {hasActiveSession && (
+        <section className="relative z-10 py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl font-bold text-foreground mb-4">Quick Access</h2>
+              <p className="text-lg text-muted-foreground">Jump right into your medical journey</p>
+            </motion.div>
 
-
-      {/* Only show About Project when no active session */}
-      {!hasActiveSession && (
-        <>
-          <AboutProject />
-        </>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  title: "Dashboard",
+                  description: "View your health overview and session data",
+                  icon: Activity,
+                  color: "text-medical-blue",
+                  path: "/dashboard"
+                },
+                {
+                  title: "AI Analysis",
+                  description: "Upload and analyze medical reports with AI",
+                  icon: Brain,
+                  color: "text-medical-purple",
+                  path: "/analysis"
+                },
+                {
+                  title: "Reports",
+                  description: "Manage your medical records and history",
+                  icon: Upload,
+                  color: "text-medical-green",
+                  path: "/reports"
+                }
+              ].map((item, index) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card 
+                    className="glass border-white/20 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                    onClick={() => navigate(item.path)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className={`w-16 h-16 ${item.color} bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                        <item.icon size={32} />
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground mb-2">{item.title}</h3>
+                      <p className="text-muted-foreground text-sm">{item.description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
-      {/* Features Section - Always show */}
+      {/* Features Section */}
       <section className="relative z-10 py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -103,13 +146,13 @@ const Index = () => {
                 color: "text-medical-amber"
               },
               {
-                icon: Upload,
+                icon: Shield,
                 title: "Secure Storage",
                 description: "Your medical data is encrypted and stored securely with Firebase",
                 color: "text-medical-green"
               },
               {
-                icon: Activity,
+                icon: Clock,
                 title: "Real-time Insights",
                 description: "Get instant analysis and alerts for any concerning health patterns",
                 color: "text-medical-red"
@@ -135,6 +178,35 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="relative z-10 py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="glass p-12 rounded-3xl text-center"
+          >
+            <h2 className="text-3xl font-bold text-foreground mb-8">Trusted by Healthcare Enthusiasts</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <div className="text-4xl font-bold text-medical-blue mb-2">1000+</div>
+                <p className="text-muted-foreground">Reports Analyzed</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-medical-green mb-2">500+</div>
+                <p className="text-muted-foreground">Active Users</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-medical-purple mb-2">24/7</div>
+                <p className="text-muted-foreground">AI Assistance</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="relative z-10 py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -150,7 +222,8 @@ const Index = () => {
             <p className="text-xl text-muted-foreground mb-8">
               Join thousands of users who trust MediBee for their medical needs
             </p>
-            {!hasActiveSession && (
+            
+            {!hasActiveSession ? (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -159,16 +232,25 @@ const Index = () => {
               >
                 Start Your Health Journey
               </motion.button>
-            )}
-            {hasActiveSession && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/dashboard')}
-                className="px-8 py-4 bg-medical-gradient text-white rounded-xl font-semibold shadow-neon-blue hover:shadow-lg transition-all"
-              >
-                Go to Dashboard
-              </motion.button>
+            ) : (
+              <div className="space-y-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/dashboard')}
+                  className="px-8 py-4 bg-medical-gradient text-white rounded-xl font-semibold shadow-neon-blue hover:shadow-lg transition-all mr-4"
+                >
+                  Go to Dashboard
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/analysis')}
+                  className="px-8 py-4 bg-gradient-to-r from-medical-purple to-medical-blue text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  Start AI Analysis
+                </motion.button>
+              </div>
             )}
           </motion.div>
         </div>

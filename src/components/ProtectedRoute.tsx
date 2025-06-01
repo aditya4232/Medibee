@@ -9,28 +9,19 @@ import { Home, LogIn } from 'lucide-react';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireSession?: boolean;
-  redirectToHome?: boolean;
 }
 
-const ProtectedRoute = ({ children, requireSession = false, redirectToHome = true }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireSession = false }: ProtectedRouteProps) => {
   const { hasActiveSession, isLoading, triggerSessionStart } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (requireSession && !isLoading && !hasActiveSession) {
-      if (redirectToHome) {
-        console.log('ProtectedRoute: Redirecting to homepage for session start');
-        navigate('/', { replace: true });
-        setTimeout(() => {
-          triggerSessionStart();
-        }, 100);
-      } else {
-        console.log('ProtectedRoute: Triggering session popup on current page');
-        triggerSessionStart();
-      }
+      console.log('ProtectedRoute: No session, redirecting to homepage');
+      navigate('/', { replace: true });
     }
-  }, [hasActiveSession, isLoading, requireSession, triggerSessionStart, navigate, redirectToHome]);
+  }, [hasActiveSession, isLoading, requireSession, navigate]);
 
   if (isLoading) {
     return (
@@ -40,7 +31,7 @@ const ProtectedRoute = ({ children, requireSession = false, redirectToHome = tru
     );
   }
 
-  if (requireSession && !hasActiveSession && !redirectToHome) {
+  if (requireSession && !hasActiveSession) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">

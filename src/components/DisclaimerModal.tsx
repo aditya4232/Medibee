@@ -106,7 +106,7 @@ const DisclaimerModal = () => {
                     <Checkbox
                       id="terms"
                       checked={acceptedTerms}
-                      onCheckedChange={setAcceptedTerms}
+                      onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                     />
                     <label htmlFor="terms" className="text-sm text-foreground leading-relaxed">
                       I understand that MediBee is for educational purposes only and is not a substitute for professional medical advice.
@@ -117,7 +117,7 @@ const DisclaimerModal = () => {
                     <Checkbox
                       id="disclaimer"
                       checked={acceptedDisclaimer}
-                      onCheckedChange={setAcceptedDisclaimer}
+                      onCheckedChange={(checked) => setAcceptedDisclaimer(checked === true)}
                     />
                     <label htmlFor="disclaimer" className="text-sm text-foreground leading-relaxed">
                       I agree to the terms of service and privacy policy, and consent to anonymous data collection for service improvement.

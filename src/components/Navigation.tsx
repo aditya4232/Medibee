@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Heart, Stethoscope, User } from 'lucide-react';
+import { Menu, X, Heart, Stethoscope, User, BarChart3, FileText, Activity } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSession } from './SessionProvider';
@@ -19,9 +19,9 @@ const Navigation = () => {
   ];
 
   const protectedItems = hasActiveSession ? [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Analysis', path: '/analysis' },
-    { name: 'Reports', path: '/reports' },
+    { name: 'Dashboard', path: '/dashboard', icon: BarChart3 },
+    { name: 'Analysis', path: '/analysis', icon: Activity },
+    { name: 'Reports', path: '/reports', icon: FileText },
   ] : [];
 
   const allItems = [...navItems, ...protectedItems];

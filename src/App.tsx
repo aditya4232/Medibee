@@ -41,7 +41,7 @@ const App: React.FC = () => {
             <MedicalDisclaimer />
             <DisclaimerModal />
             <ScrollProgressBar />
-            <div className="pt-12 sm:pt-14">
+            <div className="pt-8">
               <Suspense fallback={
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-blue-950 dark:to-slate-800 flex items-center justify-center">
                   <LoadingSpinner size="lg" text="Loading MediBee..." />

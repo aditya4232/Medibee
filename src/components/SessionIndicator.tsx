@@ -30,15 +30,15 @@ const SessionIndicator = () => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed top-20 right-20 z-40"
+      className="fixed top-16 right-20 z-40"
     >
-      <div className="flex items-center gap-2 glass px-3 py-2 rounded-lg backdrop-blur-lg border border-white/20">
+      <div className="flex items-center gap-2 glass px-3 py-2 rounded-lg border border-white/20">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <div className="text-xs text-foreground">
             <div className="flex items-center gap-1">
               <User size={12} />
-              <span>{session.userData.userName || 'Guest'}</span>
+              <span className="max-w-16 truncate">{session.userData.userName || 'Guest'}</span>
             </div>
           </div>
         </div>

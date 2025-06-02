@@ -20,13 +20,15 @@ const ScrollProgressBar = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-1 bg-black/10 dark:bg-white/10 z-50">
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200/20 dark:bg-gray-800/20 z-[60]">
       <motion.div
-        className="h-full bg-medical-gradient shadow-sm"
-        style={{ width: `${scrollProgress}%` }}
+        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 shadow-sm"
         initial={{ width: 0 }}
         animate={{ width: `${scrollProgress}%` }}
-        transition={{ duration: 0.1, ease: "easeOut" }}
+        transition={{ 
+          duration: 0.1, 
+          ease: "easeOut"
+        }}
       />
     </div>
   );

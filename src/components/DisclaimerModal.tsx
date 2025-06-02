@@ -43,108 +43,105 @@ const DisclaimerModal = () => {
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: -50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed inset-0 flex items-center justify-center z-[10000] p-4"
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -50 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[10000] w-full max-w-md px-4"
           >
-            <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <Card className="glass border-red-500/30 shadow-2xl backdrop-blur-md">
-                <CardHeader className="pb-4 text-center">
-                  <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="w-8 h-8 text-red-500" />
-                  </div>
-                  <CardTitle className="text-xl text-foreground">Medical Disclaimer</CardTitle>
-                  <p className="text-sm text-muted-foreground">Important Information Before You Continue</p>
-                </CardHeader>
-                
-                <CardContent className="space-y-6">
-                  <div className="space-y-4 max-h-64 overflow-y-auto">
-                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <h3 className="font-semibold text-red-700 dark:text-red-300 mb-2 flex items-center gap-2">
-                        <AlertTriangle size={16} />
-                        Not a Medical Professional
-                      </h3>
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        MediBee is NOT a substitute for professional medical advice, diagnosis, or treatment. 
-                        Always consult with qualified healthcare professionals for medical concerns.
-                      </p>
-                    </div>
-
-                    <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                      <h3 className="font-semibold text-amber-700 dark:text-amber-300 mb-2 flex items-center gap-2">
-                        <Shield size={16} />
-                        AI-Powered Assistance
-                      </h3>
-                      <p className="text-sm text-amber-600 dark:text-amber-400">
-                        Our AI provides educational information only. Results may not be 100% accurate. 
-                        Verify all information with healthcare professionals.
-                      </p>
-                    </div>
-
-                    <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                      <h3 className="font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-2">
-                        <CheckCircle size={16} />
-                        Privacy & Data
-                      </h3>
-                      <p className="text-sm text-blue-600 dark:text-blue-400">
-                        We collect anonymous session data to improve our services. 
-                        No personal medical information is permanently stored without your consent.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-foreground">Emergency Situations:</h4>
-                      <p className="text-sm text-muted-foreground">
-                        If you're experiencing a medical emergency, immediately contact emergency services (108 in India, 911 in US) 
-                        or visit the nearest hospital. Do not rely on MediBee for emergency medical guidance.
-                      </p>
-                    </div>
+            <Card className="glass border-red-500/30 shadow-2xl backdrop-blur-md">
+              <CardHeader className="pb-4 text-center">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <AlertTriangle className="w-6 h-6 text-red-500" />
+                </div>
+                <CardTitle className="text-lg text-foreground">Medical Disclaimer</CardTitle>
+                <p className="text-xs text-muted-foreground">Important Information Before You Continue</p>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <h3 className="font-semibold text-red-700 dark:text-red-300 mb-1 flex items-center gap-2 text-sm">
+                      <AlertTriangle size={14} />
+                      Not a Medical Professional
+                    </h3>
+                    <p className="text-xs text-red-600 dark:text-red-400">
+                      MediBee is NOT a substitute for professional medical advice, diagnosis, or treatment. 
+                      Always consult with qualified healthcare professionals for medical concerns.
+                    </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <Checkbox
-                        id="terms"
-                        checked={acceptedTerms}
-                        onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                      />
-                      <label htmlFor="terms" className="text-sm text-foreground leading-relaxed">
-                        I understand that MediBee is for educational purposes only and is not a substitute for professional medical advice.
-                      </label>
-                    </div>
-
-                    <div className="flex items-start space-x-3">
-                      <Checkbox
-                        id="disclaimer"
-                        checked={acceptedDisclaimer}
-                        onCheckedChange={(checked) => setAcceptedDisclaimer(checked === true)}
-                      />
-                      <label htmlFor="disclaimer" className="text-sm text-foreground leading-relaxed">
-                        I agree to the terms of service and privacy policy, and consent to anonymous data collection for service improvement.
-                      </label>
-                    </div>
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <h3 className="font-semibold text-amber-700 dark:text-amber-300 mb-1 flex items-center gap-2 text-sm">
+                      <Shield size={14} />
+                      AI-Powered Assistance
+                    </h3>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Our AI provides educational information only. Results may not be 100% accurate. 
+                      Verify all information with healthcare professionals.
+                    </p>
                   </div>
 
-                  <Button
-                    onClick={handleAccept}
-                    disabled={!canAccept}
-                    className={`w-full py-3 font-semibold ${
-                      canAccept 
-                        ? 'bg-medical-gradient hover:shadow-lg' 
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {canAccept ? 'I Understand & Agree' : 'Please Accept Both Terms'}
-                  </Button>
+                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <h3 className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center gap-2 text-sm">
+                      <CheckCircle size={14} />
+                      Privacy & Data
+                    </h3>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      We collect anonymous session data to improve our services. 
+                      No personal medical information is permanently stored without your consent.
+                    </p>
+                  </div>
 
-                  <p className="text-xs text-center text-muted-foreground">
-                    This disclaimer will be shown once per day for your safety.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-foreground text-sm">Emergency Situations:</h4>
+                    <p className="text-xs text-muted-foreground">
+                      If you're experiencing a medical emergency, immediately contact emergency services (108 in India, 911 in US) 
+                      or visit the nearest hospital. Do not rely on MediBee for emergency medical guidance.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={acceptedTerms}
+                      onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                    />
+                    <label htmlFor="terms" className="text-xs text-foreground leading-relaxed">
+                      I understand that MediBee is for educational purposes only and is not a substitute for professional medical advice.
+                    </label>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="disclaimer"
+                      checked={acceptedDisclaimer}
+                      onCheckedChange={(checked) => setAcceptedDisclaimer(checked === true)}
+                    />
+                    <label htmlFor="disclaimer" className="text-xs text-foreground leading-relaxed">
+                      I agree to the terms of service and privacy policy, and consent to anonymous data collection for service improvement.
+                    </label>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleAccept}
+                  disabled={!canAccept}
+                  className={`w-full py-2 font-semibold text-sm ${
+                    canAccept 
+                      ? 'bg-medical-gradient hover:shadow-lg' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {canAccept ? 'I Understand & Agree' : 'Please Accept Both Terms'}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  This disclaimer will be shown once per day for your safety.
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
         </>
       )}

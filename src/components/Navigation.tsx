@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Heart, Stethoscope, User, BarChart3, FileText, Activity } from 'lucide-react';
@@ -35,7 +34,7 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-40 glass backdrop-blur-lg border-b border-white/20">
+      <nav className="fixed top-12 sm:top-14 left-0 right-0 z-40 glass backdrop-blur-lg border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -136,8 +135,8 @@ const Navigation = () => {
         </AnimatePresence>
       </nav>
 
-      {/* Spacer to prevent content from hiding under fixed nav */}
-      <div className="h-16"></div>
+      {/* Spacer to prevent content from hiding under fixed nav and disclaimer */}
+      <div className="h-28 sm:h-32"></div>
     </>
   );
 };

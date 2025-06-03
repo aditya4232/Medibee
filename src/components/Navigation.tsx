@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Heart, Stethoscope, User, BarChart3, FileText, Activity } from 'lucide-react';
+import { Menu, X, Heart, Stethoscope, User, BarChart3, FileText, Activity, Mail, FileCheck } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSession } from './SessionProvider';
@@ -14,6 +14,8 @@ const Navigation = () => {
 
   const navItems = [
     { name: 'Home', path: '/', icon: Heart },
+    { name: 'Contact', path: '/contact', icon: Mail },
+    { name: 'Terms', path: '/terms', icon: FileCheck },
     { name: 'Privacy', path: '/privacy', icon: Stethoscope },
     { name: 'About Developer', path: '/about-developer', icon: User },
   ];
@@ -44,7 +46,7 @@ const Navigation = () => {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleNavigation('/')}
             >
-              <div className="w-8 h-8 bg-medical-gradient rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Heart size={18} className="text-white" />
               </div>
               <span className="text-xl font-bold text-foreground">MediBee</span>
@@ -52,15 +54,30 @@ const Navigation = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
-              {allItems.map((item) => (
+              {navItems.slice(0, 3).map((item) => (
                 <motion.button
                   key={item.path}
                   whileHover={{ y: -2 }}
                   onClick={() => handleNavigation(item.path)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive(item.path)
-                      ? 'bg-medical-gradient text-white'
-                      : 'text-foreground hover:text-medical-blue'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'text-foreground hover:text-blue-600'
+                  }`}
+                >
+                  {item.name}
+                </motion.button>
+              ))}
+
+              {hasActiveSession && protectedItems.map((item) => (
+                <motion.button
+                  key={item.path}
+                  whileHover={{ y: -2 }}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.path)
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'text-foreground hover:text-blue-600'
                   }`}
                 >
                   {item.name}
@@ -70,7 +87,7 @@ const Navigation = () => {
               {!hasActiveSession && (
                 <Button
                   onClick={triggerSessionStart}
-                  className="bg-medical-gradient hover:shadow-lg text-white px-4 py-2 rounded-lg font-medium"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-4 py-2 rounded-lg font-medium"
                 >
                   Get Started
                 </Button>
@@ -105,7 +122,7 @@ const Navigation = () => {
                     onClick={() => handleNavigation(item.path)}
                     className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                       isActive(item.path)
-                        ? 'bg-medical-gradient text-white'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                         : 'text-foreground hover:bg-white/10'
                     }`}
                   >
@@ -124,7 +141,7 @@ const Navigation = () => {
                         triggerSessionStart();
                         setIsOpen(false);
                       }}
-                      className="w-full bg-medical-gradient hover:shadow-lg text-white py-3 rounded-lg font-medium"
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white py-3 rounded-lg font-medium"
                     >
                       Get Started
                     </Button>

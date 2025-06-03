@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, User, MapPin, Monitor, Shield, LogIn } from 'lucide-react';
+import { User, Shield, Monitor, LogIn } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -118,11 +117,8 @@ const SessionPopup = () => {
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      console.log('Starting Google login...');
       const userData = await signInWithGoogle();
       if (userData) {
-        console.log('Google login successful:', userData);
-
         await startSession(
           ipData || { ip: '127.0.0.1', location: 'Local', country: 'India', city: 'Mumbai' },
           deviceInfo || { type: 'Desktop', browser: 'Chrome', os: 'Windows' },
@@ -131,7 +127,7 @@ const SessionPopup = () => {
 
         toast({
           title: "Google Login Successful!",
-          description: `Welcome ${userData.displayName || userData.email}! Your data will be saved permanently.`,
+          description: `Welcome ${userData.displayName || userData.email}!`,
         });
 
         setTimeout(() => {
@@ -160,97 +156,89 @@ const SessionPopup = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            onClick={() => {}}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
           />
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm px-4"
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
           >
-          <Card className="glass border-white/20 shadow-2xl backdrop-blur-md">
-            <CardHeader className="pb-4 text-center">
-              <div className="space-y-3">
-                <div className="w-12 h-12 bg-medical-gradient rounded-full flex items-center justify-center mx-auto shadow-lg">
-                  <span className="text-2xl font-bold text-white">M</span>
-                </div>
-                <div>
-                  <CardTitle className="text-xl text-foreground">Welcome to MediBee</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Choose how you'd like to continue</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 p-3 rounded-lg glass">
-                  <Shield className="h-4 w-4 text-medical-green" />
+            <Card className="glass border-white/20 shadow-2xl backdrop-blur-md w-full max-w-md">
+              <CardHeader className="pb-4 text-center">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <span className="text-2xl font-bold text-white">M</span>
+                  </div>
                   <div>
-                    <p className="text-xs font-medium text-foreground">Privacy First</p>
+                    <CardTitle className="text-xl text-foreground">Welcome to MediBee</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">Choose how you'd like to continue</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 p-3 rounded-lg glass">
-                  <Monitor className="h-4 w-4 text-medical-blue" />
-                  <div>
-                    <p className="text-xs font-medium text-foreground">Secure Session</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2 p-3 rounded-lg glass">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Privacy First</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-lg glass">
+                    <Monitor className="h-4 w-4 text-blue-500" />
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Secure Session</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Button
-                  onClick={handleGoogleLogin}
-                  disabled={isGoogleLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 text-sm shadow-lg"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Recommended • Permanent storage • Cross-device sync
-                </p>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/20" />
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleGoogleLogin}
+                    disabled={isGoogleLoading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 text-sm shadow-lg"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Recommended • Permanent storage • Cross-device sync
+                  </p>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or</span>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Input
-                  placeholder="Enter your name (optional)"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  className="glass border-white/20 placeholder-muted-foreground"
-                />
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Enter your name (optional)"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="glass border-white/20 placeholder-muted-foreground"
+                  />
 
-                <Button
-                  onClick={handleStartSession}
-                  disabled={isLoading || !deviceInfo || !ipData}
-                  variant="outline"
-                  className="w-full glass border-white/20 font-semibold py-3"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  {isLoading ? 'Starting...' : 'Start Guest Session'}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Temporary • 7-hour limit • Local storage only
-                </p>
-              </div>
-
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">
-                  By continuing, you agree to our{' '}
-                  <button className="text-medical-blue hover:underline">Privacy Policy</button>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                  <Button
+                    onClick={handleStartSession}
+                    disabled={isLoading || !deviceInfo || !ipData}
+                    variant="outline"
+                    className="w-full glass border-white/20 font-semibold py-3"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    {isLoading ? 'Starting...' : 'Start Guest Session'}
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Temporary • 7-hour limit • Local storage only
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         </>
       )}

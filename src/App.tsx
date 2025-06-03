@@ -19,6 +19,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Analysis = lazy(() => import("./pages/Analysis"));
 const Reports = lazy(() => import("./pages/Reports"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Terms = lazy(() => import("./pages/Terms"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AboutDeveloper = lazy(() => import("./pages/AboutDeveloper"));
 
@@ -61,6 +63,8 @@ const App: React.FC = () => {
                       <Footer />
                     </>
                   } />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/terms" element={<Terms />} />
                   <Route path="/about-developer" element={<AboutDeveloper />} />
                   
                   {/* Protected routes */}

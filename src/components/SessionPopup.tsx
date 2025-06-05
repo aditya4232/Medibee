@@ -156,19 +156,15 @@ const SessionPopup = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
-          style={{ 
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(8px)'
-          }}
+          className="fixed inset-0 z-[99998] bg-black/50 flex items-start justify-center pt-20"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-sm"
+            initial={{ opacity: 0, scale: 0.9, y: -50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -50 }}
+            className="w-full max-w-sm mx-4"
           >
-            <Card className="bg-white/95 dark:bg-slate-900/95 border-white/20 shadow-2xl">
+            <Card className="bg-white dark:bg-slate-900 border-white/20 shadow-2xl">
               <CardHeader className="pb-3 text-center">
                 <div className="space-y-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
@@ -182,13 +178,13 @@ const SessionPopup = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/10 border border-green-500/20">
                     <Shield className="h-3 w-3 text-green-500" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Privacy First</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
                     <Monitor className="h-3 w-3 text-blue-500" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Secure Session</p>
@@ -212,10 +208,10 @@ const SessionPopup = () => {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
+                    <span className="w-full border-t border-gray-300 dark:border-gray-600" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    <span className="bg-white dark:bg-slate-900 px-2 text-muted-foreground">Or</span>
                   </div>
                 </div>
 
@@ -224,14 +220,14 @@ const SessionPopup = () => {
                     placeholder="Enter your name (optional)"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    className="bg-white/5 border-white/20 placeholder-muted-foreground text-sm"
+                    className="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-600 placeholder-muted-foreground text-sm"
                   />
 
                   <Button
                     onClick={handleStartSession}
                     disabled={isLoading || !deviceInfo || !ipData}
                     variant="outline"
-                    className="w-full bg-white/5 border-white/20 font-semibold py-2 text-sm"
+                    className="w-full bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-600 font-semibold py-2 text-sm"
                   >
                     <User className="w-4 h-4 mr-2" />
                     {isLoading ? 'Starting...' : 'Start Guest Session'}

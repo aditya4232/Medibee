@@ -35,22 +35,13 @@ const DisclaimerModal = () => {
     <AnimatePresence>
       {showDisclaimer && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
-          style={{ 
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(8px)'
-          }}
+          initial={{ opacity: 0, y: -100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -100 }}
+          className="fixed top-0 left-0 right-0 z-[99999] bg-white dark:bg-slate-900 border-b border-red-500/30 shadow-2xl"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-sm"
-          >
-            <Card className="bg-white/95 dark:bg-slate-900/95 border-red-500/30 shadow-2xl">
+          <div className="max-w-2xl mx-auto p-4">
+            <Card className="bg-white dark:bg-slate-900 border-red-500/30">
               <CardHeader className="pb-3 text-center">
                 <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
                   <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -60,7 +51,7 @@ const DisclaimerModal = () => {
               </CardHeader>
               
               <CardContent className="space-y-3">
-                <div className="space-y-2">
+                <div className="grid md:grid-cols-3 gap-2">
                   <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
                     <h3 className="font-semibold text-red-700 dark:text-red-300 mb-1 flex items-center gap-1 text-xs">
                       <AlertTriangle size={10} />
@@ -92,44 +83,45 @@ const DisclaimerModal = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-start space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 items-center">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
                       id="terms"
                       checked={acceptedTerms}
                       onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                     />
-                    <label htmlFor="terms" className="text-xs text-foreground leading-relaxed">
+                    <label htmlFor="terms" className="text-xs text-foreground">
                       I understand this is for educational purposes only.
                     </label>
                   </div>
 
-                  <div className="flex items-start space-x-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
                       id="disclaimer"
                       checked={acceptedDisclaimer}
                       onCheckedChange={(checked) => setAcceptedDisclaimer(checked === true)}
                     />
-                    <label htmlFor="disclaimer" className="text-xs text-foreground leading-relaxed">
-                      I agree to terms of service and privacy policy.
+                    <label htmlFor="disclaimer" className="text-xs text-foreground">
+                      I agree to terms and privacy policy.
                     </label>
                   </div>
-                </div>
 
-                <Button
-                  onClick={handleAccept}
-                  disabled={!canAccept}
-                  className={`w-full py-2 font-semibold text-sm ${
-                    canAccept 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg' 
-                      : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {canAccept ? 'I Understand & Agree' : 'Please Accept Both Terms'}
-                </Button>
+                  <Button
+                    onClick={handleAccept}
+                    disabled={!canAccept}
+                    size="sm"
+                    className={`${
+                      canAccept 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg' 
+                        : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {canAccept ? 'Accept & Continue' : 'Accept Both Terms'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

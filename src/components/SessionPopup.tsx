@@ -152,41 +152,43 @@ const SessionPopup = () => {
   return (
     <AnimatePresence>
       {showSessionPopup && (
-        <>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
+          style={{ 
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)'
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999]"
-          />
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10000] w-[90vw] max-w-md"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-sm"
           >
-            <Card className="glass border-white/20 shadow-2xl backdrop-blur-md">
+            <Card className="bg-white/95 dark:bg-slate-900/95 border-white/20 shadow-2xl">
               <CardHeader className="pb-3 text-center">
                 <div className="space-y-2">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                    <span className="text-lg font-bold text-white">M</span>
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <span className="text-sm font-bold text-white">M</span>
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-foreground">Welcome to MediBee</CardTitle>
+                    <CardTitle className="text-base text-foreground">Welcome to MediBee</CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">Choose how to continue</p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center gap-2 p-2 rounded-lg glass">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
                     <Shield className="h-3 w-3 text-green-500" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Privacy First</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg glass">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
                     <Monitor className="h-3 w-3 text-blue-500" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Secure Session</p>
@@ -222,14 +224,14 @@ const SessionPopup = () => {
                     placeholder="Enter your name (optional)"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
-                    className="glass border-white/20 placeholder-muted-foreground text-sm"
+                    className="bg-white/5 border-white/20 placeholder-muted-foreground text-sm"
                   />
 
                   <Button
                     onClick={handleStartSession}
                     disabled={isLoading || !deviceInfo || !ipData}
                     variant="outline"
-                    className="w-full glass border-white/20 font-semibold py-2 text-sm"
+                    className="w-full bg-white/5 border-white/20 font-semibold py-2 text-sm"
                   >
                     <User className="w-4 h-4 mr-2" />
                     {isLoading ? 'Starting...' : 'Start Guest Session'}
@@ -241,7 +243,7 @@ const SessionPopup = () => {
               </CardContent>
             </Card>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

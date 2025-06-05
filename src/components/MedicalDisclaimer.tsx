@@ -7,7 +7,7 @@ const MedicalDisclaimer = () => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed top-0 left-0 right-0 z-[100] bg-amber-100/95 dark:bg-amber-900/95 border-b border-amber-300 dark:border-amber-700 py-1.5 px-4 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-50 bg-amber-100/95 dark:bg-amber-900/95 border-b border-amber-300 dark:border-amber-700 py-1 px-4 shadow-lg"
     >
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-center gap-2 text-center">

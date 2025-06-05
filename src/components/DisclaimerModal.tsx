@@ -34,26 +34,28 @@ const DisclaimerModal = () => {
   return (
     <AnimatePresence>
       {showDisclaimer && (
-        <>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
+          style={{ 
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)'
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
-          />
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10000] w-[90vw] max-w-md max-h-[85vh]"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-sm"
           >
-            <Card className="glass border-red-500/30 shadow-2xl backdrop-blur-md">
+            <Card className="bg-white/95 dark:bg-slate-900/95 border-red-500/30 shadow-2xl">
               <CardHeader className="pb-3 text-center">
-                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
                 </div>
-                <CardTitle className="text-lg text-foreground">Medical Disclaimer</CardTitle>
+                <CardTitle className="text-base text-foreground">Medical Disclaimer</CardTitle>
                 <p className="text-xs text-muted-foreground">Important Information</p>
               </CardHeader>
               
@@ -61,7 +63,7 @@ const DisclaimerModal = () => {
                 <div className="space-y-2">
                   <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
                     <h3 className="font-semibold text-red-700 dark:text-red-300 mb-1 flex items-center gap-1 text-xs">
-                      <AlertTriangle size={12} />
+                      <AlertTriangle size={10} />
                       Not Medical Advice
                     </h3>
                     <p className="text-xs text-red-600 dark:text-red-400">
@@ -71,7 +73,7 @@ const DisclaimerModal = () => {
 
                   <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
                     <h3 className="font-semibold text-amber-700 dark:text-amber-300 mb-1 flex items-center gap-1 text-xs">
-                      <Shield size={12} />
+                      <Shield size={10} />
                       AI-Powered Tool
                     </h3>
                     <p className="text-xs text-amber-600 dark:text-amber-400">
@@ -81,7 +83,7 @@ const DisclaimerModal = () => {
 
                   <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
                     <h3 className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center gap-1 text-xs">
-                      <CheckCircle size={12} />
+                      <CheckCircle size={10} />
                       Privacy & Data
                     </h3>
                     <p className="text-xs text-blue-600 dark:text-blue-400">
@@ -128,7 +130,7 @@ const DisclaimerModal = () => {
               </CardContent>
             </Card>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

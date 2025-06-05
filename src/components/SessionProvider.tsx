@@ -1,8 +1,8 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { onAuthStateChange, getCurrentUser, getUserData } from '@/lib/auth';
 
 interface UserActivity {
   timestamp: string;
@@ -92,20 +92,35 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       try {
         console.log('MediBee: Initializing session system...');
         
-        const existingSessionId = localStorage.getItem('medibee_session_id');
-
-        if (existingSessionId) {
-          console.log('MediBee: Found existing session, validating...');
-          await loadSession(existingSessionId);
-        } else {
-          console.log('MediBee: No existing session found');
-          // Show popup automatically on homepage if no session
-          if (location.pathname === '/') {
-            setTimeout(() => {
-              setShowSessionPopup(true);
-            }, 2000);
+        // Check for Firebase auth state first
+        const unsubscribe = onAuthStateChange(async (user) => {
+          if (user) {
+            console.log('MediBee: Firebase user found, loading user data...');
+            const userData = await getUserData(user.uid);
+            if (userData) {
+              // Create or restore permanent user session
+              await createPermanentUserSession(userData);
+              return;
+            }
           }
-        }
+          
+          // Check for local session if no Firebase user
+          const existingSessionId = localStorage.getItem('medibee_session_id');
+          if (existingSessionId) {
+            console.log('MediBee: Found existing session, validating...');
+            await loadSession(existingSessionId);
+          } else {
+            console.log('MediBee: No existing session found');
+            // Show popup automatically on homepage if no session
+            if (location.pathname === '/') {
+              setTimeout(() => {
+                setShowSessionPopup(true);
+              }, 2000);
+            }
+          }
+        });
+
+        return () => unsubscribe();
       } catch (error) {
         console.error('Error initializing session:', error);
       } finally {
@@ -115,6 +130,58 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     initializeSession();
   }, [location.pathname]);
+
+  const createPermanentUserSession = async (userData: any) => {
+    const sessionId = `permanent_${userData.uid}_${Date.now()}`;
+    
+    const sessionData: SessionData = {
+      sessionId,
+      ipAddress: '127.0.0.1',
+      location: 'Secure Login',
+      deviceInfo: 'Authenticated Device',
+      startTime: new Date().toISOString(),
+      visitedPages: [location.pathname],
+      userActivities: [{
+        timestamp: new Date().toISOString(),
+        action: 'permanent_session_started',
+        page: location.pathname,
+        details: { 
+          userName: userData.displayName || userData.email,
+          userType: 'permanent',
+          uid: userData.uid
+        }
+      }],
+      userData: {
+        medicalRecords: userData.medicalRecords || [],
+        searchHistory: userData.searchHistory || [],
+        userName: userData.displayName || userData.email,
+        preferences: userData.preferences || {},
+        isPermanentUser: true,
+        email: userData.email,
+        displayName: userData.displayName
+      },
+      isActive: true,
+      lastActivity: new Date().toISOString()
+    };
+
+    try {
+      await setDoc(doc(db, 'sessions', sessionId), sessionData);
+      localStorage.setItem('medibee_session_id', sessionId);
+      
+      setSession(sessionData);
+      setHasActiveSession(true);
+      setShowSessionPopup(false);
+
+      // Redirect to dashboard if not already there
+      if (location.pathname === '/') {
+        navigate('/dashboard');
+      }
+
+      console.log('MediBee: Permanent session created successfully:', sessionId);
+    } catch (error) {
+      console.error('Error creating permanent session:', error);
+    }
+  };
 
   const loadSession = async (sessionId: string) => {
     try {
@@ -199,6 +266,9 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
       setSession(sessionData);
       setHasActiveSession(true);
       setShowSessionPopup(false);
+
+      // Always redirect to dashboard after session start
+      navigate('/dashboard');
 
       console.log('MediBee: Session created successfully:', sessionId);
     } catch (error) {
